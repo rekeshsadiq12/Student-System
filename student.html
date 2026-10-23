@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl" id="htmlTag">
+<head>
+    <meta charset="UTF-8">
+    <title id="pageTitle">سیستەمی بەڕێوەبردنی قوتابیان</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, sans-serif; transition: background 0.3s, color 0.3s; }
+        
+        :root {
+            --bg-color: #f4f6f9;
+            --sidebar-bg: #2c3e50;
+            --sidebar-text: #ffffff;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --table-th-bg: #34495e;
+            --border-color: #ddd;
+            --input-bg: #ffffff;
+            --input-text: #333333;
+        }
+
+        body.dark-mode {
+            --bg-color: #121212;
+            --sidebar-bg: #1e1e1e;
+            --sidebar-text: #e0e0e0;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --table-th-bg: #2d2d2d;
+            --border-color: #333333;
+            --input-bg: #2c2c2c;
+            --input-text: #ffffff;
+        }
+
+        body { display: flex; background-color: var(--bg-color); color: var(--text-color); min-height: 100vh; position: relative; }
+        
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            padding: 20px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            position: fixed;
+            top: 0;
+            height: 100vh;
+            z-index: 1000;
+            transition: 0.3s ease;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        }
+
+        html[dir="rtl"] .sidebar { right: -270px; left: auto; box-shadow: -2px 0 10px rgba(0,0,0,0.3); }
+        html[dir="rtl"] .sidebar.active { right: 0; }
+        
+        html[dir="ltr"] .sidebar { left: -270px; right: auto; box-shadow: 2px 0 10px rgba(0,0,0,0.3); }
+        html[dir="ltr"] .sidebar.active { left: 0; }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .sidebar-header h3 { font-size: 18px; color: var(--sidebar-text); }
+
+        .close-btn-icon {
+            background: none;
+            border: none;
+            color: var(--sidebar-text);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 2px 8px;
+            border-radius: 4px;
+            transition: 0.2s;
+        }
+        .close-btn-icon:hover { background-color: #e74c3c; color: white; }
+
+        .sidebar button.tab-btn {
+            background: none;
+            border: none;
+            color: var(--sidebar-text);
+            padding: 12px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+        html[dir="rtl"] .sidebar button.tab-btn { text-align: right; }
+        html[dir="ltr"] .sidebar button.tab-btn { text-align: left; }
+
+        .sidebar button.tab-btn:hover, .sidebar button.tab-btn.active {
+            background-color: var(--border-color);
+            color: #3498db;
+            font-weight: bold;
+        }
+        
+        .main-content { flex: 1; padding: 30px; margin-top: 50px; }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        .card { background: var(--card-bg); padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .form-group { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+        .form-group input, .form-group select { padding: 10px; border: 1px solid var(--border-color); background-color: var(--input-bg); color: var(--input-text); border-radius: 5px; flex: 1; min-width: 140px; }
+        
+        .filter-box { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; background: rgba(0,0,0,0.03); padding: 15px; border-radius: 6px; align-items: center; }
+        .filter-box select { padding: 8px; border: 1px solid var(--border-color); border-radius: 5px; background: var(--input-bg); color: var(--input-text); min-width: 160px; }
+        
+        #filterSpecGroup { display: none; }
+
+        .time-box { display: flex; align-items: center; gap: 5px; flex: 1; min-width: 220px; }
+        .time-box span { font-size: 13px; opacity: 0.8; }
+
+        .btn-add { background-color: #2ecc71; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        .btn-add:hover { background-color: #27ae60; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; color: var(--text-color); font-size: 13px; table-layout: auto; }
+        table, th, td { border: 1px solid var(--border-color); }
+        th, td { padding: 6px 8px; white-space: nowrap; }
+        html[dir="rtl"] th, html[dir="rtl"] td { text-align: right; }
+        html[dir="ltr"] th, html[dir="ltr"] td { text-align: left; }
+        th { background-color: var(--table-th-bg); color: white; font-size: 13px; }
+        
+        .edit-btn { background-color: #f1c40f; color: black; border: none; padding: 4px 8px; cursor: pointer; border-radius: 3px; font-size: 12px; }
+        .delete-btn { background-color: #e74c3c; color: white; border: none; padding: 4px 8px; cursor: pointer; border-radius: 3px; font-size: 12px; }
+        
+        #specializationGroup { display: none; }
+
+        .menu-toggle-btn {
+            position: absolute;
+            top: 20px;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 999;
+        }
+        html[dir="rtl"] .menu-toggle-btn { right: 30px; }
+        html[dir="ltr"] .menu-toggle-btn { left: 30px; }
+        .menu-toggle-btn:hover { background-color: #34495e; }
+
+        .top-controls {
+            position: absolute;
+            top: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 999;
+        }
+        html[dir="rtl"] .top-controls { left: 30px; }
+        html[dir="ltr"] .top-controls { right: 30px; }
+
+        .theme-toggle-btn, .lang-select {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .theme-toggle-btn:hover, .lang-select:hover { background-color: #3498db; color: white; }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            display: none;
+        }
+        .modal-box {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            padding: 25px;
+            border-radius: 10px;
+            width: 350px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+        }
+        .modal-box h3 { margin-bottom: 15px; font-size: 18px; }
+        .modal-box p { margin-bottom: 20px; font-size: 14px; opacity: 0.9; }
+        .modal-buttons { display: flex; justify-content: center; gap: 10px; }
+        .modal-btn-yes { background-color: #e74c3c; color: white; border: none; padding: 8px 20px; border-radius: 5px; cursor: pointer; }
+        .modal-btn-no { background-color: #95a5a6; color: white; border: none; padding: 8px 20px; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <button class="menu-toggle-btn" onclick="toggleSidebar()" id="menuBtnText">بەڕێوەبردن</button>
+
+    <div class="top-controls">
+        <select class="lang-select" id="langSelect" onchange="changeLanguage()">
+            <option value="ku">کوردی</option>
+            <option value="ar">العربية</option>
+            <option value="en">English</option>
+        </select>
+        <button class="theme-toggle-btn" id="themeBtnText" onclick="toggleTheme()">دۆخی تاریک</button>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3 id="sidebarTitle">بەڕێوەبردن</h3>
+            <button class="close-btn-icon" onclick="toggleSidebar()" title="داخستن">✖</button>
+        </div>
+        <button class="tab-btn active" onclick="openTab('students', this, true)" id="navStudents">تۆمارکردنی قوتابیان</button>
+        <button class="tab-btn" onclick="openTab('viewStudents', this, true)" id="navViewStudents">پشکنینی بەش و قۆناغەکان</button>
+        <button class="tab-btn" onclick="openTab('studentSchedule', this, true)" id="navStudentSchedule">خشتەی قوتابیان</button>
+        <button class="tab-btn" onclick="openTab('teacherSchedule', this, true)" id="navTeacherSchedule">خشتەی مامۆستایان</button>
+        <button class="tab-btn" onclick="openTab('teachers', this, true)" id="navTeachers">مامۆستایان</button>
+        <button class="tab-btn" onclick="openTab('grades', this, true)" id="navGrades">نەتیجە و نمرەکان</button>
+        <button class="tab-btn" onclick="openTab('attendance', this, true)" id="navAttendance">ئامادەبوون</button>
+    </div>
+
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal-box">
+            <h3 id="modalTitle">ئاگاداری سڕینەوە</h3>
+            <p id="modalDesc">ئایا دڵنیایت لە سڕینەوەی ئەم داتایە؟</p>
+            <div class="modal-buttons">
+                <button class="modal-btn-yes" onclick="confirmDelete()" id="modalYes">بەڵێ، بسڕەوە</button>
+                <button class="modal-btn-no" onclick="closeDeleteModal()" id="modalNo">نەخێر</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        
+        <!-- بەشی تۆمارکردنی قوتابیان -->
+        <div id="students" class="tab-content active card">
+            <h2 id="studentsTitle">بەشی قوتابیان</h2>
+            <br>
+            <div class="form-group">
+                <input type="hidden" id="studentId">
+                <input type="text" id="studentName" placeholder="ناوی تەواوی قوتابی">
+                
+                <select id="studentDept" onchange="checkSpecialization()">
+                    <option value="" disabled selected id="optSelectDept">دیاریکردنی بەش</option>
+                    <option value="زانستی کۆمپیوتەر" id="optComp">زانستی کۆمپیوتەر</option>
+                    <option value="ژمێریاری" id="optAcc">ژمێریاری</option>
+                    <option value="کارگێڕی" id="optMan">کارگێڕی</option>
+                </select>
+
+                <input type="number" id="studentGrade" min="1" max="5" placeholder="قۆناغ (1 تا 5)" oninput="checkSpecialization()">
+                
+                <select id="specializationGroup">
+                    <option value="" disabled selected id="optSelectSpec">تایبەتمەندی (Net / Pro)</option>
+                    <option value="Net">Net</option>
+                    <option value="Pro">Pro</option>
+                </select>
+
+                <select id="studentSection">
+                    <option value="" disabled selected id="optSelectSec">دیاریکردنی هۆبە</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                </select>
+
+                <button id="saveStudentBtn" class="btn-add" onclick="window.saveStudent()">زیادکردنی قوتابی</button>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th id="thName">ناوی قوتابی</th>
+                        <th id="thDept">بەش</th>
+                        <th id="thGrade">قۆناغ</th>
+                        <th id="thSpec">تایبەتمەندی</th>
+                        <th id="thSec">هۆبە</th>
+                        <th id="thAction">کردارەکان</th>
+                    </tr>
+                </thead>
+                <tbody id="studentTable"></tbody>
+            </table>
+        </div>
+
+        <!-- بەشی پشکنین و فلتەر -->
+        <div id="viewStudents" class="tab-content card">
+            <h2 id="viewTitle">پشکنین و نیشاندانی قوتابیان بەپێی بەش و قۆناغ</h2>
+            <br>
+            
+            <div class="filter-box">
+                <div>
+                    <label id="lblFilterDept">دیاریکردنی بەش:</label><br>
+                    <select id="filterDept" onchange="checkFilterSpecialization()">
+                        <option value="زانستی کۆمپیوتەر">زانستی کۆمپیوتەر</option>
+                        <option value="ژمێریاری">ژمێریاری</option>
+                        <option value="کارگێڕی">کارگێڕی</option>
+                    </select>
+                </div>
+                <div>
+                    <label id="lblFilterGrade">دیاریکردنی قۆناغ:</label><br>
+                    <select id="filterGrade" onchange="checkFilterSpecialization()">
+                        <option value="1">قۆناغی ۱</option>
+                        <option value="2">قۆناغی ۲</option>
+                        <option value="3">قۆناغی ۳</option>
+                        <option value="4">قۆناغی ۴</option>
+                        <option value="5">قۆناغی ۵</option>
+                    </select>
+                </div>
+                <div id="filterSpecGroup">
+                    <label>تایبەتمەندی:</label><br>
+                    <select id="filterSpec" onchange="filterStudentsTable()">
+                        <option value="">هەموویان</option>
+                        <option value="Net">Net</option>
+                        <option value="Pro">Pro</option>
+                    </select>
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th id="fThName">ناوی قوتابی</th>
+                        <th id="fThDept">بەش</th>
+                        <th id="fThGrade">قۆناغ</th>
+                        <th id="fThSpec">تایبەتمەندی</th>
+                        <th id="fThSec">هۆبە</th>
+                        <th id="fThAction">کردارەکان</th>
+                    </tr>
+                </thead>
+                <tbody id="filteredStudentTable"></tbody>
+            </table>
+        </div>
+
+        <!-- بەشی خشتەی قوتابیان -->
+        <div id="studentSchedule" class="tab-content card">
+            <h2 id="schedStudentTitle">خشتەی وانەکانی قوتابیان</h2>
+            <br>
+            <div class="form-group">
+                <input type="hidden" id="schedId">
+                <select id="schedDept">
+                    <option value="" disabled selected id="optSchedDept">دیاریکردنی بەش</option>
+                    <option value="زانستی کۆمپیوتەر" id="schedOptComp">زانستی کۆمپیوتەر</option>
+                    <option value="ژمێریاری" id="schedOptAcc">ژمێریاری</option>
+                    <option value="کارگێڕی" id="schedOptMan">کارگێڕی</option>
+                </select>
+                <input type="number" id="schedGrade" min="1" max="5" placeholder="قۆناغ (1-5)">
+                <select id="schedSection">
+                    <option value="" disabled selected id="optSchedSec">هۆبە</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                </select>
+                <input type="text" id="schedSubject" placeholder="ناوی وانە">
+                <select id="schedLessonNum">
+                    <option value="" disabled selected id="optSelectLesson">دیاریکردنی وانە</option>
+                    <option value="وانەی یەکەم" id="les1">وانەی یەکەم</option>
+                    <option value="وانەی دووەم" id="les2">وانەی دووەم</option>
+                    <option value="وانەی سێیەم" id="les3">وانەی سێیەم</option>
+                    <option value="وانەی چوارەم" id="les4">وانەی چوارەم</option>
+                    <option value="وانەی پێنجەم" id="les5">وانەی پێنجەم</option>
+                </select>
+                <input type="text" id="schedDay" placeholder="ڕۆژ (بۆ نمونە: یەکشەممە)">
+                <div class="time-box">
+                    <span id="lblFrom">لە:</span>
+                    <input type="time" id="schedTimeStart" value="08:00">
+                    <span id="lblTo">تا:</span>
+                    <input type="time" id="schedTimeEnd" value="09:00">
+                </div>
+                <button id="saveSchedBtn" class="btn-add" onclick="window.saveStudentSchedule()">زیادکردن بۆ خشتە</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th id="tsThDept">بەش</th>
+                        <th id="tsThGrade">قۆناغ</th>
+                        <th id="tsThSec">هۆبە</th>
+                        <th id="tsThSub">وانە</th>
+                        <th id="tsThNum">ڕیزبەندی وانە</th>
+                        <th id="tsThDay">ڕۆژ</th>
+                        <th id="tsThTime">کات</th>
+                        <th id="tsThAction">کردار</th>
+                    </tr>
+                </thead>
+                <tbody id="studentScheduleTable"></tbody>
+            </table>
+        </div>
+
+        <!-- بەشی خشتەی مامۆستایان -->
+        <div id="teacherSchedule" class="tab-content card">
+            <h2 id="schedTeacherTitle">خشتەی وانەکانی مامۆستایان</h2>
+            <br>
+            <div class="form-group">
+                <input type="hidden" id="tSchedId">
+                <input type="text" id="tSchedName" placeholder="ناوی مامۆستا">
+                <input type="text" id="tSchedSubject" placeholder="ناوی وانە">
+                <select id="tSchedDept">
+                    <option value="" disabled selected id="optTSchedDept">بەش</option>
+                    <option value="زانستی کۆمپیوتەر" id="tSchedOptComp">زانستی کۆمپیوتەر</option>
+                    <option value="ژمێریاری" id="tSchedOptAcc">ژمێریاری</option>
+                    <option value="کارگێڕی" id="tSchedOptMan">کارگێڕی</option>
+                </select>
+                <select id="tSchedLessonNum">
+                    <option value="" disabled selected id="tOptSelectLesson">دیاریکردنی وانە</option>
+                    <option value="وانەی یەکەم" id="tLes1">وانەی یەکەم</option>
+                    <option value="وانەی دووەم" id="tLes2">وانەی دووەم</option>
+                    <option value="وانەی سێیەم" id="tLes3">وانەی سێیەم</option>
+                    <option value="وانەی چوارەم" id="tLes4">وانەی چوارەم</option>
+                    <option value="وانەی پێنجەم" id="tLes5">وانەی پێنجەم</option>
+                </select>
+                <input type="text" id="tSchedDay" placeholder="ڕۆژ">
+                <div class="time-box">
+                    <span id="lblFrom2">لە:</span>
+                    <input type="time" id="tSchedTimeStart" value="08:00">
+                    <span id="lblTo2">تا:</span>
+                    <input type="time" id="tSchedTimeEnd" value="09:00">
+                </div>
+                <button id="saveTSchedBtn" class="btn-add" onclick="window.saveTeacherSchedule()">زیادکردنی خشتە</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th id="ttsThName">ناوی مامۆستا</th>
+                        <th id="ttsThSub">وانە</th>
+                        <th id="ttsThDept">بەش</th>
+                        <th id="ttsThNum">ڕیزبەندی وانە</th>
+                        <th id="ttsThDay">ڕۆژ</th>
+                        <th id="ttsThTime">کات</th>
+                        <th id="ttsThAction">کردار</th>
+                    </tr>
+                </thead>
+                <tbody id="teacherScheduleTable"></tbody>
+            </table>
+        </div>
+
+        <div id="teachers" class="tab-content card">
+            <h2 id="teachersTitle">بەشی مامۆستایان</h2>
+            <br>
+            <p id="teachersDesc">لێرەدا دەتوانیت زانیاری مامۆستایان تۆمار بکەیت.</p>
+        </div>
+
+        <div id="grades" class="tab-content card">
+            <h2 id="gradesTitle">بەشی نەتیجە و نمرەکان</h2>
+            <br>
+            <p id="gradesDesc">لێرەدا دەتوانیت نمرەی قوتابیان تۆمار بکەیت.</p>
+        </div>
+
+        <div id="attendance" class="tab-content card">
+            <h2 id="attendanceTitle">بەشی ئامادەبوونی ڕۆژانە</h2>
+            <br>
+            <p id="attendanceDesc">لێرەدا دەتوانیت غەیاب و مۆڵەتی قوتابیان تۆمار بکەیت.</p>
+        </div>
+
+    </div>
+
+    <script>
+        const translations = {
+            ku: {
+                pageTitle: "سیستەمی بەڕێوەبردنی قوتابیان",
+                menuBtn: "بەڕێوەبردن",
+                sidebarTitle: "بەڕێوەبردن",
+                navStudents: "تۆمارکردنی قوتابیان",
+                navViewStudents: "پشکنینی بەش و قۆناغەکان",
+                navStudentSchedule: "خشتەی قوتابیان",
+                navTeacherSchedule: "خشتەی مامۆستایان",
+                navTeachers: "مامۆستایان",
+                navGrades: "نەتیجە و نمرەکان",
+                navAttendance: "ئامادەبوون",
+                studentsTitle: "بەشی قوتابیان",
+                placeholderName: "ناوی تەواوی قوتابی",
+                optSelectDept: "دیاریکردنی بەش",
+                optComp: "زانستی کۆمپیوتەر",
+                optAcc: "ژمێریاری",
+                optMan: "کارگێڕی",
+                placeholderGrade: "قۆناغ (1 تا 5)",
+                optSelectSpec: "تایبەتمەندی (Net / Pro)",
+                optSelectSec: "دیاریکردنی هۆبە",
+                saveBtn: "زیادکردنی قوتابی",
+                editBtnText: "پاشەکەوتکردنی دەستکاری",
+                thName: "ناوی قوتابی",
+                thDept: "بەش",
+                thGrade: "قۆناغ",
+                thSpec: "تایبەتمەندی",
+                thSec: "هۆبە",
+                thAction: "کردارەکان",
+                alertDuplicate: "ئەم ناوە پێشتر لە هەمان بەش، قۆناغ، تایبەتمەندی و هۆبەدا تۆمار کراوە!",
+                successEdit: "زانیارییەکان دەستکاری کران!",
+                successSave: "پاشەکەوت کرا!",
+                darkBtn: "دۆخی تاریک",
+                lightBtn: "دۆخی ڕووناکی",
+                actionEdit: "دەستکاری",
+                actionDelete: "سڕینەوە"
+            },
+            ar: {
+                pageTitle: "نظام إدارة الطلاب",
+                menuBtn: "الإدارة",
+                sidebarTitle: "الإدارة",
+                navStudents: "تسجيل الطلاب",
+                navViewStudents: "فحص الأقسام والمراحل",
+                navStudentSchedule: "جدول الطلاب",
+                navTeacherSchedule: "جدول المعلمين",
+                navTeachers: "المعلمون",
+                navGrades: "النتائج والدرجات",
+                navAttendance: "الحضور",
+                studentsTitle: "قسم الطلاب",
+                placeholderName: "اسم الطالب الكامل",
+                optSelectDept: "حدد التخصص",
+                optComp: "علوم الحاسوب",
+                optAcc: "المحاسبة",
+                optMan: "الإدارة",
+                placeholderGrade: "المرحلة (1 إلى 5)",
+                optSelectSpec: "التخصص (Net / Pro)",
+                optSelectSec: "حدد الشعبة",
+                saveBtn: "إضافة طالب",
+                editBtnText: "حفظ التعديلات",
+                thName: "اسم الطالب",
+                thDept: "التخصص",
+                thGrade: "المرحلة",
+                thSpec: "الفرع",
+                thSec: "الشعبة",
+                thAction: "الإجراءات",
+                alertDuplicate: "هذا الطالب مسجل مسبقاً في نفس القسم والمرحلة والشعبة!",
+                successEdit: "تم تعديل البيانات بنجاح!",
+                successSave: "تم الحفظ بنجاح!",
+                darkBtn: "الوضع الداكن",
+                lightBtn: "الوضع الفاتح",
+                actionEdit: "تعديل",
+                actionDelete: "حذف"
+            },
+            en: {
+                pageTitle: "Student Management System",
+                menuBtn: "Management",
+                sidebarTitle: "Management",
+                navStudents: "Register Students",
+                navViewStudents: "View Depts & Grades",
+                navStudentSchedule: "Student Schedule",
+                navTeacherSchedule: "Teacher Schedule",
+                navTeachers: "Teachers",
+                navGrades: "Grades & Results",
+                navAttendance: "Attendance",
+                studentsTitle: "Students Section",
+                placeholderName: "Full Student Name",
+                optSelectDept: "Select Department",
+                optComp: "Computer Science",
+                optAcc: "Accounting",
+                optMan: "Management",
+                placeholderGrade: "Grade (1 to 5)",
+                optSelectSpec: "Specialization (Net / Pro)",
+                optSelectSec: "Select Section",
+                saveBtn: "Add Student",
+                editBtnText: "Save Edit",
+                thName: "Student Name",
+                thDept: "Department",
+                thGrade: "Grade",
+                thSpec: "Specialization",
+                thSec: "Section",
+                thAction: "Actions",
+                alertDuplicate: "This student is already registered in the same department, grade, and section!",
+                successEdit: "Data updated successfully!",
+                successSave: "Saved successfully!",
+                darkBtn: "Dark Mode",
+                lightBtn: "Light Mode",
+                actionEdit: "Edit",
+                actionDelete: "Delete"
+            }
+        };
+
+        let currentLang = 'ku';
+
+        function changeLanguage() {
+            let select = document.getElementById('langSelect').value;
+            currentLang = select;
+            let t = translations[currentLang];
+
+            let htmlTag = document.getElementById('htmlTag');
+            if (currentLang === 'en') {
+                htmlTag.setAttribute('dir', 'ltr');
+                htmlTag.setAttribute('lang', 'en');
+            } else if (currentLang === 'ar') {
+                htmlTag.setAttribute('dir', 'rtl');
+                htmlTag.setAttribute('lang', 'ar');
+            } else {
+                htmlTag.setAttribute('dir', 'rtl');
+                htmlTag.setAttribute('lang', 'ku');
+            }
+
+            document.getElementById('pageTitle').innerText = t.pageTitle;
+            document.getElementById('menuBtnText').innerText = t.menuBtn;
+            document.getElementById('sidebarTitle').innerText = t.sidebarTitle;
+            document.getElementById('navStudents').innerText = t.navStudents;
+            document.getElementById('navViewStudents').innerText = t.navViewStudents;
+            document.getElementById('navStudentSchedule').innerText = t.navStudentSchedule;
+            document.getElementById('navTeacherSchedule').innerText = t.navTeacherSchedule;
+            document.getElementById('navTeachers').innerText = t.navTeachers;
+            document.getElementById('navGrades').innerText = t.navGrades;
+            document.getElementById('navAttendance').innerText = t.navAttendance;
+            
+            document.getElementById('studentsTitle').innerText = t.studentsTitle;
+            document.getElementById('studentName').placeholder = t.placeholderName;
+            document.getElementById('optSelectDept').innerText = t.optSelectDept;
+            document.getElementById('optComp').innerText = t.optComp;
+            document.getElementById('optAcc').innerText = t.optAcc;
+            document.getElementById('optMan').innerText = t.optMan;
+            document.getElementById('studentGrade').placeholder = t.placeholderGrade;
+            document.getElementById('optSelectSpec').innerText = t.optSelectSpec;
+            document.getElementById('optSelectSec').innerText = t.optSelectSec;
+
+            localStorage.setItem('siteLang', currentLang);
+        }
+
+        let itemToDeleteId = null;
+        let deleteCollectionName = '';
+
+        function toggleSidebar() {
+            let sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('active');
+        }
+
+        function openTab(tabId, element, closeMenu = false) {
+            let contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+
+            let buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(tabId).classList.add('active');
+            if (element) {
+                element.classList.add('active');
+            }
+
+            localStorage.setItem('activeTab', tabId);
+            
+            // تەنها کاتێک سایدی بار دادەخرێت کە لە ناو سایدی بارەکە خۆی کلیک کرابێت
+            if (closeMenu) {
+                let sidebar = document.getElementById('sidebar');
+                if (sidebar.classList.contains('active')) {
+                    sidebar.classList.remove('active');
+                }
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            let savedLang = localStorage.getItem('siteLang');
+            if (savedLang) {
+                document.getElementById('langSelect').value = savedLang;
+                changeLanguage();
+            }
+
+            let savedTab = localStorage.getItem('activeTab');
+            if (savedTab) {
+                let targetTab = document.getElementById(savedTab);
+                if (targetTab) {
+                    let contents = document.querySelectorAll('.tab-content');
+                    contents.forEach(content => content.classList.remove('active'));
+                    targetTab.classList.add('active');
+
+                    let buttons = document.querySelectorAll('.sidebar button.tab-btn');
+                    buttons.forEach(btn => {
+                        if (btn.getAttribute('onclick').includes(savedTab)) {
+                            btn.classList.add('active');
+                        } else {
+                            btn.classList.remove('active');
+                        }
+                    });
+                }
+            }
+        });
+
+        function checkSpecialization() {
+            let dept = document.getElementById('studentDept').value;
+            let grade = parseInt(document.getElementById('studentGrade').value);
+            let specSelect = document.getElementById('specializationGroup');
+
+            if (dept === "زانستی کۆمپیوتەر" && (grade === 4 || grade === 5)) {
+                specSelect.style.display = "block";
+            } else {
+                specSelect.style.display = "none";
+                specSelect.value = "";
+            }
+        }
+
+        function checkFilterSpecialization() {
+            let dept = document.getElementById('filterDept').value;
+            let grade = parseInt(document.getElementById('filterGrade').value);
+            let filterSpecGroup = document.getElementById('filterSpecGroup');
+
+            if (dept === "زانستی کۆمپیوتەر" && (grade === 4 || grade === 5)) {
+                filterSpecGroup.style.display = "block";
+            } else {
+                filterSpecGroup.style.display = "none";
+                document.getElementById('filterSpec').value = "";
+            }
+            filterStudentsTable();
+        }
+
+        function toggleTheme() {
+            let body = document.body;
+            let t = translations[currentLang];
+            body.classList.toggle('dark-mode');
+            
+            let btn = document.getElementById('themeBtnText');
+            if (body.classList.contains('dark-mode')) {
+                btn.innerText = t.lightBtn;
+            } else {
+                btn.innerText = t.darkBtn;
+            }
+        }
+
+        window.openDeleteModal = function(id, collectionName) {
+            itemToDeleteId = id;
+            deleteCollectionName = collectionName;
+            document.getElementById('deleteModal').style.display = 'flex';
+        };
+
+        function closeDeleteModal() {
+            itemToDeleteId = null;
+            deleteCollectionName = '';
+            document.getElementById('deleteModal').style.display = 'none';
+        }
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, where, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDYouV_1YS--bKzCdmjGABMV5V7gySwCxc",
+            authDomain: "student-admin-d3c1c.firebaseapp.com",
+            projectId: "student-admin-d3c1c",
+            storageBucket: "student-admin-d3c1c.firebasestorage.app",
+            messagingSenderId: "871463920181",
+            appId: "1:871463920181:web:33488c0f0ee2fa2d07877c",
+            measurementId: "G-Z9CY5FTYBQ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let globalStudentsData = [];
+
+        // --- 1. بەشی قوتابیان ---
+        window.saveStudent = async function() {
+            let t = translations[currentLang];
+            let id = document.getElementById('studentId').value;
+            let name = document.getElementById('studentName').value.trim();
+            let dept = document.getElementById('studentDept').value;
+            let grade = document.getElementById('studentGrade').value;
+            let spec = document.getElementById('specializationGroup').value;
+            let section = document.getElementById('studentSection').value;
+
+            if (name === '' || dept === '' || grade === '' || section === '') {
+                alert('تکایە هەموو خانەکان پڕبکەرەوە');
+                return;
+            }
+
+            if (grade < 1 || grade > 5) {
+                alert('قۆناغ دەبێت لە نێوان 1 تا 5 بێت');
+                return;
+            }
+
+            if (dept === "زانستی کۆمپیوتەر" && (parseInt(grade) === 4 || parseInt(grade) === 5) && spec === '') {
+                alert('تکایە تایبەتمەندی دیاری بکه');
+                return;
+            }
+
+            try {
+                let q = query(
+                    collection(db, "students"), 
+                    where("name", "==", name),
+                    where("dept", "==", dept),
+                    where("grade", "==", grade),
+                    where("spec", "==", spec),
+                    where("section", "==", section)
+                );
+                
+                let querySnapshot = await getDocs(q);
+
+                if (!id && !querySnapshot.empty) {
+                    alert(t.alertDuplicate);
+                    return;
+                }
+
+                if (id) {
+                    await updateDoc(doc(db, "students", id), { name: name, dept: dept, grade: grade, spec: spec, section: section });
+                    alert(t.successEdit);
+                    document.getElementById('studentId').value = '';
+                    document.getElementById('saveStudentBtn').innerText = t.saveBtn;
+                } else {
+                    await addDoc(collection(db, "students"), { name: name, dept: dept, grade: grade, spec: spec, section: section, createdAt: serverTimestamp() });
+                    alert(t.successSave);
+                }
+                
+                document.getElementById('studentName').value = '';
+                document.getElementById('studentDept').value = '';
+                document.getElementById('studentGrade').value = '';
+                document.getElementById('specializationGroup').value = '';
+                document.getElementById('studentSection').value = '';
+                checkSpecialization();
+
+            } catch (e) {
+                console.error("هەڵە: ", e);
+            }
+        };
+
+        window.prepareEdit = function(id, name, dept, grade, spec, section) {
+            let t = translations[currentLang];
+            document.getElementById('studentId').value = id;
+            document.getElementById('studentName').value = name;
+            document.getElementById('studentDept').value = dept || '';
+            document.getElementById('studentGrade').value = grade;
+            
+            checkSpecialization();
+            document.getElementById('specializationGroup').value = spec || '';
+            document.getElementById('studentSection').value = section;
+            document.getElementById('saveStudentBtn').innerText = t.editBtnText;
+            
+            // چوون بۆ بەشی قوتابیان بە بێ بازدانی سایدی بار (سایدی بار نەکرێتەوە)
+            openTab('students', document.getElementById('navStudents'), false);
+        };
+
+        window.filterStudentsTable = function() {
+            let selectedDept = document.getElementById('filterDept').value;
+            let selectedGrade = document.getElementById('filterGrade').value;
+            let selectedSpec = document.getElementById('filterSpec').value;
+            let table = document.getElementById('filteredStudentTable');
+            table.innerHTML = "";
+
+            let t = translations[currentLang];
+
+            globalStudentsData.forEach(item => {
+                let matchesDept = item.dept === selectedDept;
+                let matchesGrade = String(item.grade) === String(selectedGrade);
+                let matchesSpec = true;
+
+                if (selectedDept === "زانستی کۆمپیوتەر" && (selectedGrade == 4 || selectedGrade == 5)) {
+                    if (selectedSpec !== "") {
+                        matchesSpec = (item.spec === selectedSpec);
+                    }
+                }
+
+                if (matchesDept && matchesGrade && matchesSpec) {
+                    let row = table.insertRow();
+                    row.insertCell(0).innerText = item.name;
+                    row.insertCell(1).innerText = item.dept;
+                    row.insertCell(2).innerText = item.grade;
+                    row.insertCell(3).innerText = item.spec || '-';
+                    row.insertCell(4).innerText = item.section;
+                    let actionsCell = row.insertCell(5);
+                    actionsCell.innerHTML = `
+                        <button class="edit-btn" onclick="window.prepareEdit('${item.id}', '${item.name}', '${item.dept}', '${item.grade}', '${item.spec || ''}', '${item.section}')">${t.actionEdit}</button>
+                        <button class="delete-btn" onclick="window.openDeleteModal('${item.id}', 'students')">${t.actionDelete}</button>
+                    `;
+                }
+            });
+        };
+
+        onSnapshot(collection(db, "students"), (snapshot) => {
+            let table = document.getElementById('studentTable');
+            table.innerHTML = ""; 
+            globalStudentsData = [];
+
+            let t = translations[currentLang];
+
+            snapshot.forEach((documentSnap) => {
+                let student = documentSnap.data();
+                let id = documentSnap.id;
+                
+                globalStudentsData.push({ id: id, ...student });
+
+                let row = table.insertRow();
+                row.insertCell(0).innerText = student.name;
+                row.insertCell(1).innerText = student.dept || '-';
+                row.insertCell(2).innerText = student.grade;
+                row.insertCell(3).innerText = student.spec || '-';
+                row.insertCell(4).innerText = student.section;
+                
+                let actionsCell = row.insertCell(5);
+                actionsCell.innerHTML = `
+                    <button class="edit-btn" onclick="window.prepareEdit('${id}', '${student.name}', '${student.dept || ''}', '${student.grade}', '${student.spec || ''}', '${student.section}')">${t.actionEdit}</button>
+                    <button class="delete-btn" onclick="window.openDeleteModal('${id}', 'students')">${t.actionDelete}</button>
+                `;
+            });
+
+            window.filterStudentsTable();
+        });
+
+        // --- 2. خشتەی قوتابیان ---
+        window.saveStudentSchedule = async function() {
+            let id = document.getElementById('schedId').value;
+            let dept = document.getElementById('schedDept').value;
+            let grade = document.getElementById('schedGrade').value;
+            let section = document.getElementById('schedSection').value;
+            let subject = document.getElementById('schedSubject').value;
+            let lessonNum = document.getElementById('schedLessonNum').value;
+            let day = document.getElementById('schedDay').value;
+            let tStart = document.getElementById('schedTimeStart').value;
+            let tEnd = document.getElementById('schedTimeEnd').value;
+
+            if (!dept || !grade || !section || !subject || !lessonNum || !day || !tStart || !tEnd) {
+                alert('تکایە تەواوی خانەکان پڕبکەرەوە');
+                return;
+            }
+
+            let fullTime = `${tStart} - ${tEnd}`;
+
+            if (id) {
+                await updateDoc(doc(db, "studentSchedules", id), {
+                    dept: dept, grade: grade, section: section, subject: subject, lessonNum: lessonNum, day: day, time: fullTime
+                });
+                alert('دەستکاری خشتەی قوتابی پاشەکەوت کرا!');
+                document.getElementById('schedId').value = '';
+                document.getElementById('saveSchedBtn').innerText = 'زیادکردن بۆ خشتە';
+            } else {
+                await addDoc(collection(db, "studentSchedules"), {
+                    dept: dept, grade: grade, section: section, subject: subject, lessonNum: lessonNum, day: day, time: fullTime, createdAt: serverTimestamp()
+                });
+                alert('وانەکە پاشەکەوت کرا!');
+            }
+
+            document.getElementById('schedSubject').value = '';
+            document.getElementById('schedDay').value = '';
+        };
+
+        window.prepareEditStudentSchedule = function(id, dept, grade, section, subject, lessonNum, day, time) {
+            document.getElementById('schedId').value = id;
+            document.getElementById('schedDept').value = dept;
+            document.getElementById('schedGrade').value = grade;
+            document.getElementById('schedSection').value = section;
+            document.getElementById('schedSubject').value = subject;
+            document.getElementById('schedLessonNum').value = lessonNum;
+            document.getElementById('schedDay').value = day;
+
+            if (time && time.includes(" - ")) {
+                let parts = time.split(" - ");
+                document.getElementById('schedTimeStart').value = parts[0];
+                document.getElementById('schedTimeEnd').value = parts[1];
+            }
+
+            document.getElementById('saveSchedBtn').innerText = 'پاشەکەوتکردنی دەستکاری';
+        };
+
+        onSnapshot(collection(db, "studentSchedules"), (snapshot) => {
+            let t = translations[currentLang];
+            let table = document.getElementById('studentScheduleTable');
+            table.innerHTML = "";
+            snapshot.forEach(docSnap => {
+                let item = docSnap.data();
+                let id = docSnap.id;
+                let row = table.insertRow();
+                row.insertCell(0).innerText = item.dept;
+                row.insertCell(1).innerText = item.grade;
+                row.insertCell(2).innerText = item.section;
+                row.insertCell(3).innerText = item.subject;
+                row.insertCell(4).innerText = item.lessonNum;
+                row.insertCell(5).innerText = item.day;
+                row.insertCell(6).innerText = item.time;
+                let actionsCell = row.insertCell(7);
+                actionsCell.innerHTML = `
+                    <button class="edit-btn" onclick="window.prepareEditStudentSchedule('${id}', '${item.dept}', '${item.grade}', '${item.section}', '${item.subject}', '${item.lessonNum}', '${item.day}', '${item.time}')">${t.actionEdit}</button>
+                    <button class="delete-btn" onclick="window.openDeleteModal('${id}', 'studentSchedules')">${t.actionDelete}</button>
+                `;
+            });
+        });
+
+        // --- 3. خشتەی مامۆستایان ---
+        window.saveTeacherSchedule = async function() {
+            let id = document.getElementById('tSchedId').value;
+            let name = document.getElementById('tSchedName').value;
+            let subject = document.getElementById('tSchedSubject').value;
+            let dept = document.getElementById('tSchedDept').value;
+            let lessonNum = document.getElementById('tSchedLessonNum').value;
+            let day = document.getElementById('tSchedDay').value;
+            let tStart = document.getElementById('tSchedTimeStart').value;
+            let tEnd = document.getElementById('tSchedTimeEnd').value;
+
+            if (!name || !subject || !dept || !lessonNum || !day || !tStart || !tEnd) {
+                alert('تکایە تەواوی خانەکان پڕبکەرەوە');
+                return;
+            }
+
+            let fullTime = `${tStart} - ${tEnd}`;
+
+            if (id) {
+                await updateDoc(doc(db, "teacherSchedules", id), {
+                    name: name, subject: subject, dept: dept, lessonNum: lessonNum, day: day, time: fullTime
+                });
+                alert('دەستکاری خشتەی مامۆستا پاشەکەوت کرا!');
+                document.getElementById('tSchedId').value = '';
+                document.getElementById('saveTSchedBtn').innerText = 'زیادکردنی خشتە';
+            } else {
+                await addDoc(collection(db, "teacherSchedules"), {
+                    name: name, subject: subject, dept: dept, lessonNum: lessonNum, day: day, time: fullTime, createdAt: serverTimestamp()
+                });
+                alert('خشتەی مامۆستا پاشەکەوت کرا!');
+            }
+
+            document.getElementById('tSchedName').value = '';
+            document.getElementById('tSchedSubject').value = '';
+            document.getElementById('tSchedDay').value = '';
+        };
+
+        window.prepareEditTeacherSchedule = function(id, name, subject, dept, lessonNum, day, time) {
+            document.getElementById('tSchedId').value = id;
+            document.getElementById('tSchedName').value = name;
+            document.getElementById('tSchedSubject').value = subject;
+            document.getElementById('tSchedDept').value = dept;
+            document.getElementById('tSchedLessonNum').value = lessonNum;
+            document.getElementById('tSchedDay').value = day;
+
+            if (time && time.includes(" - ")) {
+                let parts = time.split(" - ");
+                document.getElementById('tSchedTimeStart').value = parts[0];
+                document.getElementById('tSchedTimeEnd').value = parts[1];
+            }
+
+            document.getElementById('saveTSchedBtn').innerText = 'پاشەکەوتکردنی دەستکاری';
+        };
+
+        onSnapshot(collection(db, "teacherSchedules"), (snapshot) => {
+            let t = translations[currentLang];
+            let table = document.getElementById('teacherScheduleTable');
+            table.innerHTML = "";
+            snapshot.forEach(docSnap => {
+                let item = docSnap.data();
+                let id = docSnap.id;
+                let row = table.insertRow();
+                row.insertCell(0).innerText = item.name;
+                row.insertCell(1).innerText = item.subject;
+                row.insertCell(2).innerText = item.dept;
+                row.insertCell(3).innerText = item.lessonNum;
+                row.insertCell(4).innerText = item.day;
+                row.insertCell(5).innerText = item.time;
+                let actionsCell = row.insertCell(6);
+                actionsCell.innerHTML = `
+                    <button class="edit-btn" onclick="window.prepareEditTeacherSchedule('${id}', '${item.name}', '${item.subject}', '${item.dept}', '${item.lessonNum}', '${item.day}', '${item.time}')">${t.actionEdit}</button>
+                    <button class="delete-btn" onclick="window.openDeleteModal('${id}', 'teacherSchedules')">${t.actionDelete}</button>
+                `;
+            });
+        });
+
+        // --- 4. سڕینەوەی گشتی ---
+        window.confirmDelete = async function() {
+            if (itemToDeleteId && deleteCollectionName) {
+                try {
+                    await deleteDoc(doc(db, deleteCollectionName, itemToDeleteId));
+                    closeDeleteModal();
+                } catch (e) {
+                    console.error("هەڵە لە سڕینەوە: ", e);
+                }
+            }
+        };
+    </script>
+</body>
+</html>
