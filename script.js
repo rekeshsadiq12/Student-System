@@ -48,55 +48,6 @@ window.toggleForm = function(formId) {
     }
 };
 
-// فەنکشنی چاپکردنی ڕاپۆرت (Print / PDF)
-window.printCurrentReport = function() {
-    window.print();
-};
-
-// فەنکشنی داگرتنی کۆپی یەدەگ (Backup)
-window.exportDataBackup = function() {
-    let backupData = {
-        students: globalStudentsData,
-        subjects: globalSubjectsData,
-        teachers: globalTeachersData,
-        studentSchedules: globalStudentSchedulesData,
-        teacherSchedules: globalTeacherSchedulesData,
-        tuition: globalTuitionData,
-        backupDate: new Date().toISOString()
-    };
-    let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
-    let downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", "student_system_backup_" + new Date().toISOString().slice(0,10) + ".json");
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
-    window.showToast('کۆپی یەدەگ بە سەرکەوتوویی دابەزێنرا', 'success', 'یەدەگ');
-};
-
-// فەنکشنی گەڕانەوەی داتا لە فایلی یەدەگ (Restore)
-window.importDataRestore = async function(event) {
-    let file = event.target.files[0];
-    if (!file) return;
-    let reader = new FileReader();
-    reader.onload = async function(e) {
-        try {
-            let jsonContent = JSON.parse(e.target.result);
-            if (confirm("ئایا دڵنیایت لە بارکردنەوەی ئەم فایلە یەدەگە؟ تکایە دڵنیا ببەوە کە فایلەکە ڕاستە.")) {
-                showLoading();
-                setTimeout(() => {
-                    hideLoading();
-                    window.showToast('فایلی یەدەگ بە سەرکەوتوویی خوێنرایەوە!', 'success', 'یەدەگ');
-                }, 1000);
-            }
-        } catch(err) {
-            hideLoading();
-            window.showToast('فایلەکە هەڵەیە یان ناخوێنرێتەوە!', 'error', 'یەدەگ');
-        }
-    };
-    reader.readAsText(file);
-};
-
 let inactivityTime = function () {
     let time;
     window.onload = resetTimer;
@@ -524,7 +475,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebas
 import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, serverTimestamp, arrayUnion, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyBftSnUkGn_N8vpgHspICH4kU54eamgXz0",
+    apiKey: "AIzaSyDYouV_1YS--bKzCdmjGABMV5V7gySwCxc",
     authDomain: "student-admin-d3c1c.firebaseapp.com",
     projectId: "student-admin-d3c1c",
     storageBucket: "student-admin-d3c1c.firebasestorage.app",
