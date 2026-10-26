@@ -182,7 +182,7 @@ function updateDashboardStats() {
             labels: [presentText, absentText],
             datasets: [{
                 data: [presentCount, absentCount],
-                backgroundColor: ['#2ecc71', '#e74c3c']
+                backgroundColor: ['#10b981', '#ef4444']
             }]
         },
         options: {

@@ -59,7 +59,7 @@
                 </div>
 
                 <div id="regStepVerify" style="display: none;">
-                    <p style="font-size: 12px; color: #27ae60; margin-bottom: 10px; font-weight: bold;">کۆدی دڵنیایی نێردرا بۆ ئیمەیلەکەت!</p>
+                    <p style="font-size: 13px; color: #27ae60; margin-bottom: 12px; font-weight: bold;">کۆدی دڵنیایی نێردرا بۆ ئیمەیلەکەت!</p>
                     <input type="text" id="regEnteredCode" placeholder="کۆدی دڵنیایی (تێبکە)">
                     <button class="login-btn btn-signup" onclick="handleVerifyAndCompleteSignUp()">تەواوکردنی خۆتۆمارکردن</button>
                 </div>
@@ -79,7 +79,7 @@
                 </div>
 
                 <div id="stepVerifyAndReset" style="display: none;">
-                    <p style="font-size: 12px; color: #27ae60; margin-bottom: 10px; font-weight: bold;">کۆدی دڵنیایی نێردرا بۆ ئیمەیلەکەت!</p>
+                    <p style="font-size: 13px; color: #27ae60; margin-bottom: 12px; font-weight: bold;">کۆدی دڵنیایی نێردرا بۆ ئیمەیلەکەت!</p>
                     <input type="text" id="enteredVerifyCode" placeholder="کۆدی دڵنیایی (تێبکە)">
                     <input type="password" id="resetNewPassword" placeholder="وشەی نهێنی نوێ">
                     <button class="login-btn btn-reset" onclick="handleVerifyAndResetPassword()">گۆڕینی وشەی نهێنی</button>
@@ -155,7 +155,7 @@
             <h3 id="modalTitle">ئاگاداری سڕینەوە</h3>
             <p id="modalDesc">ئایا دڵنیایت لە سڕینەوەی ئەم داتایە؟</p>
             <div class="modal-buttons">
-                <button class="modal-btn-yes" onclick="confirmDelete()" id="modalYes" style="background-color: #e74c3c; color: white; border: none; padding: 8px 20px; border-radius: 5px; cursor: pointer;">بەڵێ، بسڕەوە</button>
+                <button class="modal-btn-yes" onclick="confirmDelete()" id="modalYes" style="background-color: #e74c3c; color: white; border: none; padding: 10px 22px; border-radius: 8px; cursor: pointer; font-weight: bold;">بەڵێ، بسڕەوە</button>
                 <button class="modal-btn-no" onclick="closeDeleteModal()" id="modalNo">نەخێر</button>
             </div>
         </div>
@@ -166,10 +166,10 @@
             <h3 id="attHistoryStudentName">مێژووی ئامادەبوونی قوتابی</h3>
             <br>
             <div class="attendance-summary-box">
-                <div class="summary-item" style="color: #27ae60;">
+                <div class="summary-item" style="color: #2ecc71;">
                     ئەوەی ئامادەبووە: <strong id="totalPresentCount">0</strong> ڕۆژ
                 </div>
-                <div class="summary-item" style="color: #c0392b;">
+                <div class="summary-item" style="color: #e74c3c;">
                     ئەوەی ئامادە نەبووە: <strong id="totalAbsentCount">0</strong> ڕۆژ
                 </div>
             </div>
@@ -285,22 +285,24 @@
                 </div>
             </div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th id="thSeq">ژ.</th>
-                        <th id="thName">ناوی قوتابی</th>
-                        <th id="thId">ئای دی (ID)</th>
-                        <th id="thPhone">ژمارەی مۆبایل</th>
-                        <th id="thDept">بەش</th>
-                        <th id="thGrade">قۆناغ</th>
-                        <th id="thSpec">تایبەتمەندی</th>
-                        <th id="thSec">هۆبە</th>
-                        <th id="thAction">کردارەکان</th>
-                    </tr>
-                </thead>
-                <tbody id="studentTable"></tbody>
-            </table>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th id="thSeq">ژ.</th>
+                            <th id="thName">ناوی قوتابی</th>
+                            <th id="thId">ئای دی (ID)</th>
+                            <th id="thPhone">ژمارەی مۆبایل</th>
+                            <th id="thDept">بەش</th>
+                            <th id="thGrade">قۆناغ</th>
+                            <th id="thSpec">تایبەتمەندی</th>
+                            <th id="thSec">هۆبە</th>
+                            <th id="thAction">کردارەکان</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTable"></tbody>
+                </table>
+            </div>
         </div>
 
         <div id="subjects" class="tab-content card">
@@ -354,19 +356,21 @@
                     </select>
                 </div>
             </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th id="subThName">ناوی بابەت</th>
-                        <th id="subThDept">بەش</th>
-                        <th id="subThGrade">قۆناغ</th>
-                        <th id="subThSpec">تایبەتمەندی</th>
-                        <th id="subThTeacher">مامۆستای وانە</th>
-                        <th id="subThAction">کردار</th>
-                    </tr>
-                </thead>
-                <tbody id="subjectsTable"></tbody>
-            </table>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th id="subThName">ناوی بابەت</th>
+                            <th id="subThDept">بەش</th>
+                            <th id="subThGrade">قۆناغ</th>
+                            <th id="subThSpec">تایبەتمەندی</th>
+                            <th id="subThTeacher">مامۆستای وانە</th>
+                            <th id="subThAction">کردار</th>
+                        </tr>
+                    </thead>
+                    <tbody id="subjectsTable"></tbody>
+                </table>
+            </div>
         </div>
 
         <div id="teachers" class="tab-content card">
@@ -388,19 +392,21 @@
                 </div>
             </div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th id="tThSeq">ژ.</th>
-                        <th id="tThName">ناوی مامۆستا</th>
-                        <th id="tThId">ئای دی (ID)</th>
-                        <th id="tThRole">جۆری دەسەڵات</th>
-                        <th id="tThSubjects">بابەتەکان</th>
-                        <th id="tThAction">کردار</th>
-                    </tr>
-                </thead>
-                <tbody id="teachersTable"></tbody>
-            </table>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th id="tThSeq">ژ.</th>
+                            <th id="tThName">ناوی مامۆستا</th>
+                            <th id="tThId">ئای دی (ID)</th>
+                            <th id="tThRole">جۆری دەسەڵات</th>
+                            <th id="tThSubjects">بابەتەکان</th>
+                            <th id="tThAction">کردار</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teachersTable"></tbody>
+                </table>
+            </div>
         </div>
 
         <div id="tuition" class="tab-content card">
@@ -415,61 +421,63 @@
                 <input type="number" id="tuitionPaid" placeholder="پارەی دراو (Paid)">
                 <button class="btn-add" onclick="window.saveTuition()">پاشەکەوتکردنی پارە</button>
             </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ناوی قوتابی</th>
-                        <th>ئای دی</th>
-                        <th>کۆی گشتی</th>
-                        <th>پارەی دراو</th>
-                        <th>ماوە (باقی)</th>
-                        <th>بارودۆخ</th>
-                        <th>کردار</th>
-                    </tr>
-                </thead>
-                <tbody id="tuitionTable"></tbody>
-            </table>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ناوی قوتابی</th>
+                            <th>ئای دی</th>
+                            <th>کۆی گشتی</th>
+                            <th>پارەی دراو</th>
+                            <th>ماوە (باقی)</th>
+                            <th>بارودۆخ</th>
+                            <th>کردار</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tuitionTable"></tbody>
+                </table>
+            </div>
         </div>
 
         <div id="profile" class="tab-content card">
             <h2 id="profileTitleText">دەستکاریکردنی پڕۆفایلی کەسی</h2>
-            <div style="display: flex; gap: 30px; flex-wrap: wrap;">
+            <div style="display: flex; gap: 30px; flex-wrap: wrap; align-items: center;">
                 <div style="text-align: center;">
-                    <img id="profileAvatarPreview" src="https://via.placeholder.com/130" alt="Profile" style="width: 130px; height: 130px; border-radius: 50%; object-fit: cover; border: 3px solid #3498db; margin-bottom: 10px;">
+                    <img id="profileAvatarPreview" src="https://via.placeholder.com/130" alt="Profile" style="width: 130px; height: 130px; border-radius: 50%; object-fit: cover; border: 3px solid #3b82f6; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
                     <br>
-                    <label for="profileImageUpload" id="lblChangeImg" style="background: #3498db; color: white; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; display: inline-block;">گۆڕینی وێنە</label>
+                    <label for="profileImageUpload" id="lblChangeImg" style="background: #3b82f6; color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; display: inline-block; font-weight: bold; transition: 0.2s;">گۆڕینی وێنە</label>
                     <input type="file" id="profileImageUpload" accept="image/*" style="display: none;" onchange="previewProfileImage(event)">
                 </div>
-                <div style="flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 10px;">
+                <div style="flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 12px;">
                     <div>
                         <label id="lblProfName">ناوی تەواو:</label>
-                        <input type="text" id="profileName" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 5px; background: var(--input-bg); color: var(--input-text);">
+                        <input type="text" id="profileName" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--input-bg); color: var(--input-text);">
                     </div>
                     <div>
                         <label id="lblProfUser">ناوی بەکارهێنەر (Username):</label>
-                        <input type="text" id="profileUsername" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 5px; background: var(--input-bg); color: var(--input-text);">
+                        <input type="text" id="profileUsername" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--input-bg); color: var(--input-text);">
                     </div>
                     <div id="teacherProfileFields">
                         <label id="lblProfPhone">ژمارەی مۆبایل:</label>
-                        <input type="tel" id="profilePhone" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 5px; background: var(--input-bg); color: var(--input-text);">
+                        <input type="tel" id="profilePhone" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--input-bg); color: var(--input-text); margin-bottom: 12px;">
                         <label id="lblProfEmail">ئیمەیل:</label>
-                        <input type="email" id="profileEmail" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 5px; background: var(--input-bg); color: var(--input-text);">
+                        <input type="email" id="profileEmail" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--input-bg); color: var(--input-text);">
                     </div>
-                    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 10px 0;">
+                    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 5px 0;">
                     <h4 id="lblProfChangePass">گۆڕینی وشەی نهێنی</h4>
                     <div>
                         <label id="lblProfOldPass">1. وشەی نهێنی پێشوو (Current Password):</label>
-                        <input type="password" id="profileOldPassword" placeholder="وشەی نهێنی کۆن بنووسە" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 5px; background: var(--input-bg); color: var(--input-text);">
+                        <input type="password" id="profileOldPassword" placeholder="وشەی نهێنی کۆن بنووسە" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--input-bg); color: var(--input-text);">
                     </div>
                     <div>
                         <label id="lblProfNewPass">2. وشەی نهێنی نوێ (New Password):</label>
-                        <input type="password" id="profileNewPassword" placeholder="وشەی نهێنی نوێ بنووسە" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 5px; background: var(--input-bg); color: var(--input-text);">
+                        <input type="password" id="profileNewPassword" placeholder="وشەی نهێنی نوێ بنووسە" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--input-bg); color: var(--input-text);">
                     </div>
                     <div>
                         <label id="lblProfConfPass">3. دڵنیابوونەوە لە وشەی نوێ (Confirm Password):</label>
-                        <input type="password" id="profileConfirmPassword" placeholder="وشەی نهێنی نوێ دووبارە بکەرەوە" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 5px; background: var(--input-bg); color: var(--input-text);">
+                        <input type="password" id="profileConfirmPassword" placeholder="وشەی نهێنی نوێ دووبارە بکەرەوە" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--input-bg); color: var(--input-text);">
                     </div>
-                    <button class="btn-add" id="btnSaveProfile" onclick="saveMyProfile()" style="margin-top: 10px;">پاشەکەوتکردنی گۆڕانکارییەکان</button>
+                    <button class="btn-add" id="btnSaveProfile" onclick="saveMyProfile()" style="margin-top: 12px; padding: 12px; border-radius: 8px; font-weight: bold;">پاشەکەوتکردنی گۆڕانکارییەکان</button>
                 </div>
             </div>
         </div>
@@ -510,22 +518,24 @@
                     <button class="btn-export" id="btnExportExcel" onclick="exportTableToExcel('filteredStudentTable', 'students_report.xlsx')">📥 داگرتنی Excel</button>
                 </div>
             </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th id="fThSeq">ژ.</th>
-                        <th id="fThName">ناوی قوتابی</th>
-                        <th id="fThId">ئای دی (ID)</th>
-                        <th id="fThPhone">ژمارەی مۆبایل</th>
-                        <th id="fThDept">بەش</th>
-                        <th id="fThGrade">قۆناغ</th>
-                        <th id="fThSpec">تایبەتمەندی</th>
-                        <th id="fThSec">هۆبە</th>
-                        <th id="fThAction">کردارەکان</th>
-                    </tr>
-                </thead>
-                <tbody id="filteredStudentTable"></tbody>
-            </table>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th id="fThSeq">ژ.</th>
+                            <th id="fThName">ناوی قوتابی</th>
+                            <th id="fThId">ئای دی (ID)</th>
+                            <th id="fThPhone">ژمارەی مۆبایل</th>
+                            <th id="fThDept">بەش</th>
+                            <th id="fThGrade">قۆناغ</th>
+                            <th id="fThSpec">تایبەتمەندی</th>
+                            <th id="fThSec">هۆبە</th>
+                            <th id="fThAction">کردارەکان</th>
+                        </tr>
+                    </thead>
+                    <tbody id="filteredStudentTable"></tbody>
+                </table>
+            </div>
         </div>
 
         <div id="grades" class="tab-content card">
@@ -571,22 +581,24 @@
                     <button class="btn-export" id="btnExportGrades" onclick="exportTableToExcel('gradesTable', 'grades_report.xlsx')">📥 داگرتنی Excel</button>
                 </div>
             </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th id="gThName">ناوی قوتابی</th>
-                        <th id="gThId">ئای دی (ID)</th>
-                        <th id="gThM1">وەرزی ۱ (20)</th>
-                        <th id="gThM2">وەرزی ۲ (20)</th>
-                        <th id="gThCourse">کۆشش (40)</th>
-                        <th id="gThFe">کۆتایی (60)</th>
-                        <th id="gThTotal">کۆی ۱۰۰</th>
-                        <th id="gThStatus">نەتیجە</th>
-                        <th id="gThAction">کردارەکان</th>
-                    </tr>
-                </thead>
-                <tbody id="gradesTable"></tbody>
-            </table>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th id="gThName">ناوی قوتابی</th>
+                            <th id="gThId">ئای دی (ID)</th>
+                            <th id="gThM1">وەرزی ۱ (20)</th>
+                            <th id="gThM2">وەرزی ۲ (20)</th>
+                            <th id="gThCourse">کۆشش (40)</th>
+                            <th id="gThFe">کۆتایی (60)</th>
+                            <th id="gThTotal">کۆی ۱۰۰</th>
+                            <th id="gThStatus">نەتیجە</th>
+                            <th id="gThAction">کردارەکان</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gradesTable"></tbody>
+                </table>
+            </div>
         </div>
 
         <div id="attendance" class="tab-content card">
@@ -624,21 +636,23 @@
                     <button class="btn-export" id="btnExportAttendance" onclick="exportTableToExcel('attendanceTable', 'attendance_report.xlsx')">📥 داگرتنی Excel</button>
                 </div>
             </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th id="attThName">ناوی قوتابی</th>
-                        <th id="attThId">ئای دی (ID)</th>
-                        <th id="attThDept">بەش</th>
-                        <th id="attThGrade">قۆناغ</th>
-                        <th id="attThHist">هێستۆری ئامادەبوون</th>
-                        <th id="attThStatus">دواین بارودۆخ</th>
-                        <th id="attThTime">دواین کاتی تۆمار</th>
-                        <th id="attThAction">کرداری ئامادەبوون</th>
-                    </tr>
-                </thead>
-                <tbody id="attendanceTable"></tbody>
-            </table>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th id="attThName">ناوی قوتابی</th>
+                            <th id="attThId">ئای دی (ID)</th>
+                            <th id="attThDept">بەش</th>
+                            <th id="attThGrade">قۆناغ</th>
+                            <th id="attThHist">هێستۆری ئامادەبوون</th>
+                            <th id="attThStatus">دواین بارودۆخ</th>
+                            <th id="attThTime">دواین کاتی تۆمار</th>
+                            <th id="attThAction">کرداری ئامادەبوون</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceTable"></tbody>
+                </table>
+            </div>
         </div>
 
         <div id="studentSchedule" class="tab-content card">
@@ -684,21 +698,23 @@
                 </div>
             </div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th id="sThDept">بەش</th>
-                        <th id="sThGrade">قۆناغ</th>
-                        <th id="sThSec">هۆبە</th>
-                        <th id="sThSub">وانە</th>
-                        <th id="sThNum">ڕیزبەندی وانە</th>
-                        <th id="sThDay">ڕۆژ</th>
-                        <th id="sThTime">کات</th>
-                        <th id="sThAction">کردار</th>
-                    </tr>
-                </thead>
-                <tbody id="studentScheduleTable"></tbody>
-            </table>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th id="sThDept">بەش</th>
+                            <th id="sThGrade">قۆناغ</th>
+                            <th id="sThSec">هۆبە</th>
+                            <th id="sThSub">وانە</th>
+                            <th id="sThNum">ڕیزبەندی وانە</th>
+                            <th id="sThDay">ڕۆژ</th>
+                            <th id="sThTime">کات</th>
+                            <th id="sThAction">کردار</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentScheduleTable"></tbody>
+                </table>
+            </div>
         </div>
 
         <div id="teacherSchedule" class="tab-content card">
@@ -737,20 +753,22 @@
                 </div>
             </div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th id="tsThName">ناوی مامۆستا</th>
-                        <th id="tsThSub">وانە</th>
-                        <th id="tsThDept">بەش</th>
-                        <th id="tsThNum">ڕیزبەندی وانە</th>
-                        <th id="tsThDay">ڕۆژ</th>
-                        <th id="tsThTime">کات</th>
-                        <th id="tsThAction">کردار</th>
-                    </tr>
-                </thead>
-                <tbody id="teacherScheduleTable"></tbody>
-            </table>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th id="tsThName">ناوی مامۆستا</th>
+                            <th id="tsThSub">وانە</th>
+                            <th id="tsThDept">بەش</th>
+                            <th id="tsThNum">ڕیزبەندی وانە</th>
+                            <th id="tsThDay">ڕۆژ</th>
+                            <th id="tsThTime">کات</th>
+                            <th id="tsThAction">کردار</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teacherScheduleTable"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
