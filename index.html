@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl" id="htmlTag">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">سیستەمی بەڕێوەبردنی قوتابیان</title>
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/2991/2991148.png">
+    
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+       (function() {
+          emailjs.init("1n3-uO38i90-PF11E");
+       })();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="loading-overlay-spinner" id="loadingSpinner">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="global-history-bar">
+        <button class="history-icon-btn" id="undoBtn" onclick="triggerUndo()" title="گەڕانەوە (Undo)" disabled>
+            <svg viewBox="0 0 24 24"><path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C20.08 11.03 16.58 8 12.5 8z"/></svg>
+        </button>
+        <button class="history-icon-btn" id="redoBtn" onclick="triggerRedo()" title="پێشڕەوی (Redo)" disabled>
+            <svg viewBox="0 0 24 24"><path d="M18.4 10.6C16.55 8.99 14.15 8 11.5 8c-4.08 0-7.58 3.03-8.97 7.22L4.9 16c1.05-3.19 4.06-5.5 7.6-5.5 1.96 0 3.73.72 5.12 1.88L14 16h9V7l-4.6 3.6z"/></svg>
+        </button>
+    </div>
+
+    <div class="login-overlay" id="loginScreen">
+        <div class="login-container">
+            
+            <div class="login-card active" id="cardSignIn">
+                <h3>چوونەژوورەوە (Sign In)</h3>
+                <input type="text" id="loginUsername" placeholder="ناوی بەکارهێنەر (Username)">
+                <input type="password" id="loginPassword" placeholder="وشەی نهێنی (Password)">
+                <button class="login-btn" onclick="handleLogin()">چوونەژوورەوە</button>
+                
+                <div class="auth-links">
+                    <p>هەژمارت نییە؟ <span onclick="switchAuthCard('cardSignUp')">خۆتۆمارکردن (Sign Up)</span></p>
+                    <p>وشەی نهێنیت بیرچووە؟ <span onclick="switchAuthCard('cardForgot')">گۆڕینی پاسوورد (Forgot Password)</span></p>
+                </div>
+            </div>
+
+            <div class="login-card" id="cardSignUp">
+                <h3>خۆتۆمارکردن (Sign Up)</h3>
+                
+                <div id="regStepData">
+                    <input type="text" id="regTeacherId" placeholder="ئای دی (ID)ی پێشوەختە تۆمارکراو">
+                    <input type="text" id="regName" placeholder="ناوی تەواوی مامۆستا">
+                    <input type="text" id="regUsername" placeholder="ناوی بەکارهێنەر (Username)">
+                    <input type="password" id="regPassword" placeholder="وشەی نهێنی (Password)">
+                    <input type="tel" id="regPhone" placeholder="ژمارەی مۆبایل">
+                    <input type="email" id="regEmail" placeholder="ئیمەیلی ڕاستەقینەت (Email)">
+                    <button class="login-btn btn-signup" onclick="handleSendRegCode()">ناردنی کۆدی دڵنیایی بۆ ئیمەیل</button>
+                </div>
+
+                <div id="regStepVerify" style="display: none;">
+                    <p style="font-size: 12px; color: #27ae60; margin-bottom: 10px; font-weight: bold;">کۆدی دڵنیایی نێردرا بۆ ئیمەیلەکەت!</p>
+                    <input type="text" id="regEnteredCode" placeholder="کۆدی دڵنیایی (تێبکە)">
+                    <button class="login-btn btn-signup" onclick="handleVerifyAndCompleteSignUp()">تەواوکردنی خۆتۆمارکردن</button>
+                </div>
+                
+                <div class="auth-links">
+                    <p>هەژمارت هەیە؟ <span onclick="switchAuthCard('cardSignIn')">چوونەژوورەوە (Sign In)</span></p>
+                </div>
+            </div>
+
+            <div class="login-card" id="cardForgot">
+                <h3>گۆڕینی پاسوورد (Forgot Password)</h3>
+                
+                <div id="stepRequestCode">
+                    <input type="text" id="resetTeacherId" placeholder="ئای دی (ID)ی بەکارهێنەر / مامۆستا">
+                    <input type="text" id="resetContact" placeholder="ئیمەیلی تۆمارکراو">
+                    <button class="login-btn btn-reset" onclick="handleSendVerifyCode()">ناردنی کۆدی دڵنیایی (Send Code)</button>
+                </div>
+
+                <div id="stepVerifyAndReset" style="display: none;">
+                    <p style="font-size: 12px; color: #27ae60; margin-bottom: 10px; font-weight: bold;">کۆدی دڵنیایی نێردرا بۆ ئیمەیلەکەت!</p>
+                    <input type="text" id="enteredVerifyCode" placeholder="کۆدی دڵنیایی (تێبکە)">
+                    <input type="password" id="resetNewPassword" placeholder="وشەی نهێنی نوێ">
+                    <button class="login-btn btn-reset" onclick="handleVerifyAndResetPassword()">گۆڕینی وشەی نهێنی</button>
+                </div>
+
+                <div class="auth-links">
+                    <p>گەڕانەوە بۆ <span onclick="switchAuthCard('cardSignIn')">چوونەژوورەوە (Sign In)</span></p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="toast" class="toast-notification"></div>
+
+    <button class="menu-toggle-btn" onclick="toggleSidebar()" id="menuBtnText">بەڕێوەبردن</button>
+
+    <div class="top-controls">
+        <div class="speed-meter" id="speedMeter">
+            <span class="speed-indicator" id="speedDot"></span>
+            <span id="speedValue">... ms</span>
+        </div>
+        <select class="lang-select" id="langSelect" onchange="changeLanguage(this.value)">
+            <option value="ku">کوردی</option>
+            <option value="ar">العربية</option>
+            <option value="en">English</option>
+        </select>
+        <button class="theme-toggle-btn" id="themeBtnText" onclick="toggleTheme()">دۆخی تاریک</button>
+    </div>
+
+    <button class="notif-bell-btn" onclick="toggleNotifPanel()" title="تۆماری ئاگادارییەکان">
+        🔔
+        <span class="notif-badge" id="notifCount">0</span>
+    </button>
+
+    <div class="notif-panel" id="notifPanel">
+        <div class="notif-header">
+            <span id="lblNotifTitle">تۆماری ئاگادارییەکان</span>
+            <span style="cursor:pointer; font-size:12px;" onclick="clearNotifLogs()">سڕینەوە</span>
+        </div>
+        <div class="notif-body" id="notifList"></div>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3 id="sidebarTitle">بەڕێوەبردن</h3>
+            <button class="close-btn-icon" onclick="toggleSidebar()" title="داخستن">✖</button>
+        </div>
+
+        <div class="sidebar-profile-box" id="sidebarProfileBox">
+            <img id="sidebarUserAvatar" src="https://via.placeholder.com/35" class="sidebar-avatar" alt="Avatar" onclick="openTab('profile', null, true)" title="دەستکاریکردنی پڕۆفایل">
+            <div class="sidebar-user-details">
+                <div id="sidebarUserName" class="sidebar-username">-</div>
+                <div id="sidebarUserRoleText" class="sidebar-userrole">-</div>
+            </div>
+        </div>
+
+        <button class="tab-btn active" onclick="openTab('dashboard', this, true)" id="navDashboard">داشبۆرد و ئامارەکان</button>
+        <button class="tab-btn" onclick="openTab('students', this, true)" id="navStudents">تۆمارکردنی قوتابیان</button>
+        <button class="tab-btn" onclick="openTab('viewStudents', this, true)" id="navViewStudents">پشکنینی بەش و قۆناغەکان</button>
+        <button class="tab-btn" onclick="openTab('subjects', this, true)" id="navSubjects">تۆمارکردنی بابەتەکان</button>
+        <button class="tab-btn" onclick="openTab('grades', this, true)" id="navGrades">نەتیجە و نمرەکان</button>
+        <button class="tab-btn" onclick="openTab('studentSchedule', this, true)" id="navStudentSchedule">خشتەی قوتابیان</button>
+        <button class="tab-btn" onclick="openTab('teacherSchedule', this, true)" id="navTeacherSchedule">خشتەی مامۆستایان</button>
+        <button class="tab-btn" onclick="openTab('teachers', this, true)" id="navTeachers">مامۆستایان</button>
+        <button class="tab-btn" onclick="openTab('tuition', this, true)" id="navTuition">پارەی خوێندن و قیستەکان</button>
+        <button class="tab-btn" style="display:none;" onclick="openTab('profile', this, true)" id="navProfile">پڕۆفایلی من</button>
+        <button class="tab-btn" onclick="openTab('attendance', this, true)" id="navAttendance">ئامادەبوون</button>
+    </div>
+
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal-box" style="max-width: 420px;">
+            <h3 id="modalTitle">ئاگاداری سڕینەوە</h3>
+            <p id="modalDesc">ئایا دڵنیایت لە سڕینەوەی ئەم داتایە؟</p>
+            <div class="modal-buttons">
+                <button class="modal-btn-yes" onclick="confirmDelete()" id="modalYes" style="background-color: #e74c3c; color: white; border: none; padding: 8px 20px; border-radius: 5px; cursor: pointer;">بەڵێ، بسڕەوە</button>
+                <button class="modal-btn-no" onclick="closeDeleteModal()" id="modalNo">نەخێر</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="attendanceHistoryModal">
+        <div class="modal-box">
+            <h3 id="attHistoryStudentName">مێژووی ئامادەبوونی قوتابی</h3>
+            <br>
+            <div class="attendance-summary-box">
+                <div class="summary-item" style="color: #27ae60;">
+                    ئەوەی ئامادەبووە: <strong id="totalPresentCount">0</strong> ڕۆژ
+                </div>
+                <div class="summary-item" style="color: #c0392b;">
+                    ئەوەی ئامادە نەبووە: <strong id="totalAbsentCount">0</strong> ڕۆژ
+                </div>
+            </div>
+            
+            <ul class="history-list" id="attHistoryListContainer"></ul>
+            <br>
+            <div class="modal-buttons">
+                <button class="modal-btn-no" onclick="closeAttendanceHistoryModal()">داخستن</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="avgModal">
+        <div class="modal-box" style="max-width: 420px;">
+            <h3 id="avgStudentName">ئەنجامی تێکڕای (مەعدەل)ی قوتابی</h3>
+            <br>
+            <ul class="history-list" id="avgSubjectList"></ul>
+            <hr><br>
+            <h4 id="avgTotalResult">تێکڕا (مەعدەل): -</h4>
+            <br>
+            <div class="modal-buttons">
+                <button class="modal-btn-no" onclick="closeAvgModal()">داخستن</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="allGradesModal">
+        <div class="modal-box">
+            <h3 id="allGradesTitle">تەواوی نمرەی قوتابیانی پۆل</h3>
+            <br>
+            <div class="table-responsive">
+                <table id="allGradesReportTable">
+                    <thead id="allGradesReportHead"></thead>
+                    <tbody id="allGradesReportBody"></tbody>
+                </table>
+            </div>
+            <br>
+            <div class="modal-buttons">
+                <button class="modal-btn-no" onclick="closeAllGradesModal()">داخستن</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        
+        <div class="user-info-bar" id="userInfoBar">
+            <div>
+                <span id="lblCurrentUser">بەکارهێنەری ئێستا: </span>
+                <strong id="currentUserName">-</strong> 
+                (<span id="currentUserRole">-</span>)
+            </div>
+            <button class="btn-logout" id="btnLogoutText" onclick="handleLogout()">دەربازبوون (Logout)</button>
+        </div>
+
+        <div id="dashboard" class="tab-content card active">
+            <h2 id="dashTitleText">داشبۆرد و ئاماری گشتی سیستەم</h2>
+            <br>
+            
+            <!-- بەشی Backup & Restore زیادکرا بۆ داشبۆرد -->
+            <div class="card" id="backupRestoreCard" style="margin-bottom: 25px; background: rgba(52, 152, 219, 0.05); border: 1px dashed #3498db;">
+                <h3 style="font-size: 15px; margin-bottom: 5px;">بەڕێوەبردنی کۆپی یەدەگی داتا (Backup & Restore)</h3>
+                <p style="font-size: 12px; opacity: 0.7; margin-bottom: 12px;">تایبەت بە پاشکەوتکردن یان گەڕانەوەی تەواوی داتاکانی سیستەم بۆ پاراستن</p>
+                <button class="btn-export" onclick="exportDataBackup()">📥 داگرتنی کۆپی یەدەگ (Backup)</button>
+                <label for="restoreFileInput" class="btn-add" style="display:inline-block; cursor:pointer; margin-top:5px; font-size:12px; padding:7px 15px;">📤 گەڕانەوەی داتا (Restore)</label>
+                <input type="file" id="restoreFileInput" accept=".json" style="display:none;" onchange="importDataRestore(event)">
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <h4 id="statStudentsText">کۆی گشتی قوتابیان</h4>
+                    <span id="statStudentsCount">0</span>
+                </div>
+                <div class="stat-card">
+                    <h4 id="statTeachersText">کۆی گشتی مامۆستایان</h4>
+                    <span id="statTeachersCount">0</span>
+                </div>
+                <div class="stat-card">
+                    <h4 id="statSubjectsText">کۆی گشتی بابەتەکان</h4>
+                    <span id="statSubjectsCount">0</span>
+                </div>
+                <div class="stat-card">
+                    <h4 id="statAttendanceText">ڕێژەی ئامادەبوونی ئەمڕۆ</h4>
+                    <span id="statAttendanceRate">0%</span>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="attendanceChart"></canvas>
+            </div>
+        </div>
+
+        <!-- بەشی قوتابیان -->
+        <div id="students" class="tab-content card">
+            <h2 id="studentsTitle">بەشی قوتابیان</h2>
+            <br>
+            <button class="btn-toggle-form" onclick="toggleForm('studentFormContainer')">➕ زیادکردنی قوتابی (فۆرم)</button>
+            <input type="text" id="searchStudentsInput" class="search-input-field" placeholder="گەڕان بەدوای ناو، ئای دی، یان مۆبایل..." oninput="filterStudentsTable()">
+            
+            <div class="collapsible-form" id="studentFormContainer">
+                <div class="form-group" style="width: 100%; margin-bottom: 0;">
+                    <input type="hidden" id="studentId">
+                    <input type="text" id="studentName" placeholder="ناوی تەواوی قوتابی">
+                    <input type="text" id="studentUniqueId" placeholder="ئای دی (ID)">
+                    <input type="tel" id="studentPhone" placeholder="ژمارەی مۆبایل">
+                    
+                    <select id="studentDept" onchange="checkSpecialization()">
+                        <option value="" disabled selected id="optSelectDept">دیاریکردنی بەش</option>
+                        <option value="زانستی کۆمپیوتەر" id="optComp">زانستی کۆمپیوتەر</option>
+                        <option value="ژمێریاری" id="optAcc">ژمێریاری</option>
+                        <option value="کارگێڕی" id="optMan">کارگێڕی</option>
+                    </select>
+                    <input type="number" id="studentGrade" min="1" max="5" placeholder="قۆناغ (1 تا 5)" oninput="checkSpecialization()">
+                    <select id="specializationGroup">
+                        <option value="" disabled selected id="optSelectSpec">تایبەتمەندی (Net / Pro)</option>
+                        <option value="Net">Net</option>
+                        <option value="Pro">Pro</option>
+                    </select>
+                    <select id="studentSection">
+                        <option value="" disabled selected id="optSelectSec">دیاریکردنی هۆبە</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                    </select>
+                    <button id="saveStudentBtn" class="btn-add" onclick="window.saveStudent()">پاشەکەوتکردنی قوتابی</button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th id="thSeq">ژ.</th>
+                            <th id="thName">ناوی قوتابی</th>
+                            <th id="thId">ئای دی (ID)</th>
+                            <th id="thPhone">ژمارەی مۆبایل</th>
+                            <th id="thDept">بەش</th>
+                            <th id="thGrade">قۆناغ</th>
+                            <th id="thSpec">تایبەتمەندی</th>
+                            <th id="thSec">هۆبە</th>
+                            <th id="thAction">کردارەکان</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- بەشی بابەتەکان -->
+        <div id="subjects" class="tab-content card">
+            <h2 id="subjectsTitleText">زیادکردن و بەڕێوەبردنی بابەتەکان (ماددەکان)</h2>
+            <br>
+            <button class="btn-toggle-form" onclick="toggleForm('subjectFormContainer')">➕ زیادکردنی بابەت (فۆرم)</button>
+            <input type="text" id="searchSubjectsInput" class="search-input-field" placeholder="گەڕان بەدوای ناوی بابەت یان مامۆستا..." oninput="filterSubjectsTable()">
+            
+            <div class="collapsible-form" id="subjectFormContainer">
+                <div class="form-group" style="width: 100%; margin-bottom: 0;">
+                    <input type="hidden" id="subjectId">
+                    <input type="text" id="subjectName" placeholder="ناوی بابەت (بۆ نمونە: سیستەم)">
+                    <select id="subjectDept" onchange="checkSubjectSpecialization(); window.filterSubjectsTable();">
+                        <option value="" disabled selected id="optSubjDept">دیاریکردنی بەش</option>
+                        <option value="زانستی کۆمپیوتەر" id="optSubComp">زانستی کۆمپیوتەر</option>
+                        <option value="ژمێریاری" id="optSubAcc">ژمێریاری</option>
+                        <option value="کارگێڕی" id="optSubMan">کارگێڕی</option>
+                    </select>
+                    <input type="number" id="subjectGrade" min="1" max="5" placeholder="قۆناغ (1 تا 5)" oninput="checkSubjectSpecialization(); window.filterSubjectsTable();">
+                    <select id="subjectSpecializationGroup">
+                        <option value="" disabled selected id="optSubjSelectSpec">تایبەتمەندی (Net / Pro)</option>
+                        <option value="Net">Net</option>
+                        <option value="Pro">Pro</option>
+                    </select>
+                    <select id="subjectTeacher">
+                        <option value="" selected id="optSubTeacher">دیاریکردنی مامۆستای بابەت (بەبژاردە)</option>
+                    </select>
+                    <button id="saveSubjBtn" class="btn-add" onclick="window.saveSubject()">پاشەکەوتکردنی بابەت</button>
+                </div>
+            </div>
+
+            <div class="filter-box">
+                <div>
+                    <label id="lblSubFilterDept">پیشاندانی بابەتەکانی بەشی:</label><br>
+                    <select id="subFilterDept" onchange="window.filterSubjectsTable()">
+                        <option value="هەمووان" id="optSubAll">هەمووان</option>
+                        <option value="زانستی کۆمپیوتەر">زانستی کۆمپیوتەر</option>
+                        <option value="ژمێریاری">ژمێریاری</option>
+                        <option value="کارگێڕی">کارگێڕی</option>
+                    </select>
+                </div>
+                <div>
+                    <label id="lblSubFilterGrade">قۆناغ:</label><br>
+                    <select id="subFilterGrade" onchange="window.filterSubjectsTable()">
+                        <option value="" id="optSubAllGrades">هەموو قۆناغەکان</option>
+                        <option value="1" id="optSubG1">قۆناغی ۱</option>
+                        <option value="2" id="optSubG2">قۆناغی ۲</option>
+                        <option value="3" id="optSubG3">قۆناغی ۳</option>
+                        <option value="4" id="optSubG4">قۆناغی ۴</option>
+                        <option value="5" id="optSubG5">قۆناغی ۵</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th id="subThName">ناوی بابەت</th>
+                            <th id="subThDept">بەش</th>
+                            <th id="subThGrade">قۆناغ</th>
+                            <th id="subThSpec">تایبەتمەندی</th>
+                            <th id="subThTeacher">مامۆستای وانە</th>
+                            <th id="subThAction">کردار</th>
+                        </tr>
+                    </thead>
+                    <tbody id="subjectsTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- بەشی مامۆستایان -->
+        <div id="teachers" class="tab-content card">
+            <h2 id="teachersTitle">تۆمارکردن و بەڕێوەبردنی مامۆستایان</h2>
+            <br>
+            <button class="btn-toggle-form" onclick="toggleForm('teacherFormContainer')">➕ زیادکردنی مامۆستا (فۆرم)</button>
+            <input type="text" id="searchTeachersInput" class="search-input-field" placeholder="گەڕان بەدوای ناوی مامۆستا یان ئای دی..." oninput="renderTeachersTable()">
+            
+            <div class="collapsible-form" id="teacherFormContainer">
+                <div class="form-group" style="width: 100%; margin-bottom: 0;">
+                    <input type="hidden" id="teacherDocId">
+                    <input type="text" id="teacherNameInput" placeholder="ناوی تەواوی مامۆستا">
+                    <input type="text" id="teacherIdInput" placeholder="ئای دی (ID)ی تایبەت">
+                    <select id="teacherRoleInput">
+                        <option value="teacher">مامۆستای ئاسایی</option>
+                        <option value="admin">بەڕێوەبەر (دەسەڵاتی تەواو)</option>
+                    </select>
+                    <button class="btn-add" onclick="window.saveTeacher()" id="saveTeacherBtnText">پاشەکەوتکردنی مامۆستا</button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th id="tThSeq">ژ.</th>
+                            <th id="tThName">ناوی مامۆستا</th>
+                            <th id="tThId">ئای دی (ID)</th>
+                            <th id="tThRole">جۆری دەسەڵات</th>
+                            <th id="tThSubjects">بابەتەکان</th>
+                            <th id="tThAction">کردار</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teachersTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="tuition" class="tab-content card">
+            <h2>بەڕێوەبردنی قیست و پارەی خوێندنی قوتابیان</h2>
+            <input type="text" id="searchTuitionInput" class="search-input-field" placeholder="گەڕان بەدوای ناوی قوتابی یان ئای دی..." oninput="renderTuitionTable()">
+            <div class="form-group">
+                <input type="hidden" id="tuitionId">
+                <select id="tuitionStudentSelect">
+                    <option value="" disabled selected>هەڵبژاردنی قوتابی...</option>
+                </select>
+                <input type="number" id="tuitionTotal" placeholder="کۆی گشتی پارە (IQD)">
+                <input type="number" id="tuitionPaid" placeholder="پارەی دراو (Paid)">
+                <button class="btn-add" onclick="window.saveTuition()">پاشەکەوتکردنی پارە</button>
+            </div>
+            
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ناوی قوتابی</th>
+                            <th>ئای دی</th>
+                            <th>کۆی گشتی</th>
+                            <th>پارەی دراو</th>
+                            <th>ماوە (باقی)</th>
+                            <th>بارودۆخ</th>
+                            <th>کردار</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tuitionTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="profile" class="tab-content card">
+            <h2 id="profileTitleText">دەستکاریکردنی پڕۆفایلی کەسی</h2>
+            <div style="display: flex; gap: 30px; flex-wrap: wrap;">
+                <div style="text-align: center;">
+                    <img id="profileAvatarPreview" src="https://via.placeholder.com/130" alt="Profile" style="width: 130px; height: 130px; border-radius: 50%; object-fit: cover; border: 3px solid #3498db; margin-bottom: 10px;">
+                    <br>
+                    <label for="profileImageUpload" id="lblChangeImg" style="background: #3498db; color: white; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; display: inline-block;">گۆڕینی وێنە</label>
+                    <input type="file" id="profileImageUpload" accept="image/*" style="display: none;" onchange="previewProfileImage(event)">
+                </div>
+                <div style="flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 10px;">
+                    <div>
+                        <label id="lblProfName">ناوی تەواو:</label>
+                        <input type="text" id="profileName" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 5px; background: var(--input-bg); color: var(--input-text);">
+                    </div>
+                    <div>
+                        <label id="lblProfUser">ناوی بەکارهێنەر (Username):</label>
+                        <input type="text" id="profileUsername" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 5px; background: var(--input-bg); color: var(--input-text);">
+                    </div>
+                    <div id="teacherProfileFields">
+                        <label id="lblProfPhone">ژمارەی مۆبایل:</label>
+                        <input type="tel" id="profilePhone" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 5px; background: var(--input-bg); color: var(--input-text);">
+                        <label id="lblProfEmail">ئیمەیل:</label>
+                        <input type="email" id="profileEmail" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 5px; background: var(--input-bg); color: var(--input-text);">
+                    </div>
+                    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 10px 0;">
+                    <h4 id="lblProfChangePass">گۆڕینی وشەی نهێنی</h4>
+                    <div>
+                        <label id="lblProfOldPass">1. وشەی نهێنی پێشوو (Current Password):</label>
+                        <input type="password" id="profileOldPassword" placeholder="وشەی نهێنی کۆن بنووسە" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 5px; background: var(--input-bg); color: var(--input-text);">
+                    </div>
+                    <div>
+                        <label id="lblProfNewPass">2. وشەی نهێنی نوێ (New Password):</label>
+                        <input type="password" id="profileNewPassword" placeholder="وشەی نهێنی نوێ بنووسە" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 5px; background: var(--input-bg); color: var(--input-text);">
+                    </div>
+                    <div>
+                        <label id="lblProfConfPass">3. دڵنیابوونەوە لە وشەی نوێ (Confirm Password):</label>
+                        <input type="password" id="profileConfirmPassword" placeholder="وشەی نهێنی نوێ دووبارە بکەرەوە" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 5px; background: var(--input-bg); color: var(--input-text);">
+                    </div>
+                    <button class="btn-add" id="btnSaveProfile" onclick="saveMyProfile()" style="margin-top: 10px;">پاشەکەوتکردنی گۆڕانکارییەکان</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="viewStudents" class="tab-content card">
+            <h2 id="viewTitle">پشکنین و نیشاندانی قوتابیان بەپێی بەش و قۆناغ</h2>
+            <input type="text" id="searchViewStudentsInput" class="search-input-field" placeholder="گەڕان بەدوای ناو یان ئای دی لەم بەشەدا..." oninput="filterStudentsTable()">
+            <div class="filter-box">
+                <div>
+                    <label id="lblFilterDept">دیاریکردنی بەش:</label><br>
+                    <select id="filterDept" onchange="checkFilterSpecialization()">
+                        <option value="هەمووان" id="optViewAllDepts">هەمووان</option>
+                        <option value="زانستی کۆمپیوتەر">زانستی کۆمپیوتەر</option>
+                        <option value="ژمێریاری">ژمێریاری</option>
+                        <option value="کارگێڕی">کارگێڕی</option>
+                    </select>
+                </div>
+                <div>
+                    <label id="lblFilterGrade">دیاریکردنی قۆناغ:</label><br>
+                    <select id="filterGrade" onchange="checkFilterSpecialization()">
+                        <option value="هەموو قۆناغەکان" id="optViewAllGrades">هەموو قۆناغەکان</option>
+                        <option value="1">قۆناغی ۱</option>
+                        <option value="2">قۆناغی ۲</option>
+                        <option value="3">قۆناغی ۳</option>
+                        <option value="4">قۆناغی ۴</option>
+                        <option value="5">قۆناغی ۵</option>
+                    </select>
+                </div>
+                <div id="filterSpecGroup">
+                    <label id="lblFilterSpec">تایبەتمەندی:</label><br>
+                    <select id="filterSpec" onchange="filterStudentsTable()">
+                        <option value="" id="optAll">هەموویان</option>
+                        <option value="Net">Net</option>
+                        <option value="Pro">Pro</option>
+                    </select>
+                </div>
+                <div>
+                    <button class="btn-export" id="btnExportExcel" onclick="exportTableToExcel('filteredStudentTable', 'students_report.xlsx')">📥 داگرتنی Excel</button>
+                    <!-- دوگمەی چاپکردن زیادکرا -->
+                    <button class="btn-export" style="background-color: #8e44ad;" onclick="printCurrentReport()">🖨️ چاپکردنی ڕاپۆرت</button>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th id="fThSeq">ژ.</th>
+                            <th id="fThName">ناوی قوتابی</th>
+                            <th id="fThId">ئای دی (ID)</th>
+                            <th id="fThPhone">ژمارەی مۆبایل</th>
+                            <th id="fThDept">بەش</th>
+                            <th id="fThGrade">قۆناغ</th>
+                            <th id="fThSpec">تایبەتمەندی</th>
+                            <th id="fThSec">هۆبە</th>
+                            <th id="fThAction">کردارەکان</th>
+                        </tr>
+                    </thead>
+                    <tbody id="filteredStudentTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="grades" class="tab-content card">
+            <h2 id="gradesTitle">تۆمارکردن و ئەژمارکردنی مەعدەلی نمرەکان</h2>
+            <input type="text" id="searchGradesInput" class="search-input-field" placeholder="گەڕان بەدوای ناوی قوتابی یان ئای دی..." oninput="filterGradesTable()">
+            <div class="filter-box">
+                <div>
+                    <label id="lblGradeDept">دیاریکردنی بەش:</label><br>
+                    <select id="gradeFilterDept" onchange="checkGradeFilterSpecialization()">
+                        <option value="هەمووان" id="optGradeAllDepts">هەمووان</option>
+                        <option value="زانستی کۆمپیوتەر">زانستی کۆمپیوتەر</option>
+                        <option value="ژمێریاری">ژمێریاری</option>
+                        <option value="کارگێڕی">کارگێڕی</option>
+                    </select>
+                </div>
+                <div>
+                    <label id="lblGradeGrade">دیاریکردنی قۆناغ:</label><br>
+                    <select id="gradeFilterGrade" onchange="checkGradeFilterSpecialization()">
+                        <option value="1">قۆناغی ۱</option>
+                        <option value="2">قۆناغی ۲</option>
+                        <option value="3">قۆناغی ۳</option>
+                        <option value="4">قۆناغی ۴</option>
+                        <option value="5">قۆناغی ۵</option>
+                    </select>
+                </div>
+                <div id="gradeFilterSpecGroup">
+                    <label id="lblGradeSpec">تایبەتمەندی:</label><br>
+                    <select id="gradeFilterSpec" onchange="filterGradesTable()">
+                        <option value="" id="optAll2">هەموویان</option>
+                        <option value="Net">Net</option>
+                        <option value="Pro">Pro</option>
+                    </select>
+                </div>
+                <div>
+                    <label id="lblGradeSubj">دیاریکردنی بابەت:</label><br>
+                    <select id="gradeSubjectSelect" onchange="filterGradesTable()">
+                        <option value="" id="optSelectSubj">هەڵبژاردنی بابەت...</option>
+                    </select>
+                </div>
+                <div>
+                    <button class="btn-calc-avg" id="btnAvgText" onclick="window.calculateOverallAverage()">تێکڕا (مەعدەل)</button>
+                    <button class="btn-view-all-grades" id="btnViewAllGradesText" onclick="window.openAllGradesModal()">بینینی نمرەی هەموو قوتابیان</button>
+                    <button class="btn-export" id="btnExportGrades" onclick="exportTableToExcel('gradesTable', 'grades_report.xlsx')">📥 داگرتنی Excel</button>
+                    <button class="btn-export" style="background-color: #8e44ad;" onclick="printCurrentReport()">🖨️ چاپکردنی نمرەکان</button>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th id="gThName">ناوی قوتابی</th>
+                            <th id="gThId">ئای دی (ID)</th>
+                            <th id="gThM1">وەرزی ۱ (20)</th>
+                            <th id="gThM2">وەرزی ۲ (20)</th>
+                            <th id="gThCourse">کۆشش (40)</th>
+                            <th id="gThFe">کۆتایی (60)</th>
+                            <th id="gThTotal">کۆی ۱۰۰</th>
+                            <th id="gThStatus">نەتیجە</th>
+                            <th id="gThAction">کردارەکان</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gradesTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="attendance" class="tab-content card">
+            <h2 id="attendanceTitle">پشکنین و تۆمارکردنی ئامادەبوونی قوتابیان</h2>
+            <input type="text" id="searchAttendanceInput" class="search-input-field" placeholder="گەڕان بەدوای ناوی قوتابی یان ئای دی..." oninput="filterAttendanceTable()">
+            <div class="filter-box">
+                <div>
+                    <label id="lblAttDept">دیاریکردنی بەش:</label><br>
+                    <select id="attFilterDept" onchange="checkAttFilterSpecialization()">
+                        <option value="هەمووان" id="optAttAllDepts">هەمووان</option>
+                        <option value="زانستی کۆمپیوتەر">زانستی کۆمپیوتەر</option>
+                        <option value="ژمێریاری">ژمێریاری</option>
+                        <option value="کارگێڕی">کارگێڕی</option>
+                    </select>
+                </div>
+                <div>
+                    <label id="lblAttGrade">دیاریکردنی قۆناغ:</label><br>
+                    <select id="attFilterGrade" onchange="checkAttFilterSpecialization()">
+                        <option value="1">قۆناغی ۱</option>
+                        <option value="2">قۆناغی ۲</option>
+                        <option value="3">قۆناغی ۳</option>
+                        <option value="4">قۆناغی ۴</option>
+                        <option value="5">قۆناغی ۵</option>
+                    </select>
+                </div>
+                <div id="attFilterSpecGroup">
+                    <label id="lblAttSpec">تایبەتمەندی:</label><br>
+                    <select id="attFilterSpec" onchange="filterAttendanceTable()">
+                        <option value="" id="optAll3">هەموویان</option>
+                        <option value="Net">Net</option>
+                        <option value="Pro">Pro</option>
+                    </select>
+                </div>
+                <div>
+                    <button class="btn-export" id="btnExportAttendance" onclick="exportTableToExcel('attendanceTable', 'attendance_report.xlsx')">📥 داگرتنی Excel</button>
+                    <button class="btn-export" style="background-color: #8e44ad;" onclick="printCurrentReport()">🖨️ چاپکردنی ئامادەبوون</button>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th id="attThName">ناوی قوتابی</th>
+                            <th id="attThId">ئای دی (ID)</th>
+                            <th id="attThDept">بەش</th>
+                            <th id="attThGrade">قۆناغ</th>
+                            <th id="attThHist">هێستۆری ئامادەبوون</th>
+                            <th id="attThStatus">دواین بارودۆخ</th>
+                            <th id="attThTime">دواین کاتی تۆمار</th>
+                            <th id="attThAction">کرداری ئامادەبوون</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- خشتەی قوتابیان -->
+        <div id="studentSchedule" class="tab-content card">
+            <h2 id="schedStudentTitle">خشتەی وانەکانی قوتابیان</h2>
+            <br>
+            <button class="btn-toggle-form" onclick="toggleForm('studentSchedFormContainer')">➕ زیادکردن بۆ خشتە (فۆرم)</button>
+            <input type="text" id="searchStudentScheduleInput" class="search-input-field" placeholder="گەڕان بەدوای وانە یان ڕۆژ..." oninput="renderStudentSchedules()">
+            
+            <div class="collapsible-form" id="studentSchedFormContainer">
+                <div class="form-group" style="width: 100%; margin-bottom: 0;">
+                    <input type="hidden" id="schedId">
+                    <select id="schedDept">
+                        <option value="" disabled selected id="optSchDept">دیاریکردنی بەش</option>
+                        <option value="هەمووان" id="optSchAllDepts">هەمووان</option>
+                        <option value="زانستی کۆمپیوتەر">زانستی کۆمپیوتەر</option>
+                        <option value="ژمێریاری">ژمێریاری</option>
+                        <option value="کارگێڕی">کارگێڕی</option>
+                    </select>
+                    <input type="number" id="schedGrade" min="1" max="5" placeholder="قۆناغ (1-5)">
+                    <select id="schedSection">
+                        <option value="" disabled selected id="optSchSec">هۆبە</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                    </select>
+                    <input type="text" id="schedSubject" placeholder="ناوی وانە">
+                    <select id="schedLessonNum">
+                        <option value="" disabled selected id="optSchLes">دیاریکردنی وانە</option>
+                        <option value="وانەی یەکەم" id="l1">وانەی یەکەم</option>
+                        <option value="وانەی دووەم" id="l2">وانەی دووەم</option>
+                        <option value="وانەی سێیەم" id="l3">وانەی سێیەم</option>
+                        <option value="وانەی چوارەم" id="l4">وانەی چوارەم</option>
+                        <option value="وانەی پێنجەم" id="l5">وانەی پێنجەم</option>
+                    </select>
+                    <input type="text" id="schedDay" placeholder="ڕۆژ">
+                    <div class="time-box">
+                        <span id="lblFrom">لە:</span>
+                        <input type="time" id="schedTimeStart" value="08:00">
+                        <span id="lblTo">تا:</span>
+                        <input type="time" id="schedTimeEnd" value="09:00">
+                    </div>
+                    <button id="saveSchBtn" class="btn-add" onclick="window.saveStudentSchedule()">زیادکردن بۆ خشتە</button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th id="sThDept">بەش</th>
+                            <th id="sThGrade">قۆناغ</th>
+                            <th id="sThSec">هۆبە</th>
+                            <th id="sThSub">وانە</th>
+                            <th id="sThNum">ڕیزبەندی وانە</th>
+                            <th id="sThDay">ڕۆژ</th>
+                            <th id="sThTime">کات</th>
+                            <th id="sThAction">کردار</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentScheduleTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- خشتەی مامۆستایان -->
+        <div id="teacherSchedule" class="tab-content card">
+            <h2 id="schedTeacherTitle">خشتەی وانەکانی مامۆستایان</h2>
+            <br>
+            <button class="btn-toggle-form" onclick="toggleForm('teacherSchedFormContainer')">➕ زیادکردنی خشتە (فۆرم)</button>
+            <input type="text" id="searchTeacherScheduleInput" class="search-input-field" placeholder="گەڕان بەدوای ناوی مامۆستا یان وانە..." oninput="renderTeacherSchedules()">
+            
+            <div class="collapsible-form" id="teacherSchedFormContainer">
+                <div class="form-group" style="width: 100%; margin-bottom: 0;">
+                    <input type="hidden" id="tSchedId">
+                    <input type="text" id="tSchedName" placeholder="ناوی مامۆستا">
+                    <input type="text" id="tSchedSubject" placeholder="ناوی وانە">
+                    <select id="tSchedDept">
+                        <option value="" disabled selected id="optTSchDept">بەش</option>
+                        <option value="زانستی کۆمپیوتەر">زانستی کۆمپیوتەر</option>
+                        <option value="ژمێریاری">ژمێریاری</option>
+                        <option value="کارگێڕی">کارگێڕی</option>
+                    </select>
+                    <select id="tSchedLessonNum">
+                        <option value="" disabled selected id="optTSchLes">دیاریکردنی وانە</option>
+                        <option value="وانەی یەکەم">وانەی یەکەم</option>
+                        <option value="وانەی دووەم">وانەی دووەم</option>
+                        <option value="وانەی سێیەم">وانەی سێیەم</option>
+                        <option value="وانەی چوارەم">وانەی چوارەم</option>
+                        <option value="وانەی پێنجەم">وانەی پێنجەم</option>
+                    </select>
+                    <input type="text" id="tSchedDay" placeholder="ڕۆژ">
+                    <div class="time-box">
+                        <span id="lblFrom2">لە:</span>
+                        <input type="time" id="tSchedTimeStart" value="08:00">
+                        <span id="lblTo2">تا:</span>
+                        <input type="time" id="tSchedTimeEnd" value="09:00">
+                    </div>
+                    <button id="saveTSchBtn" class="btn-add" onclick="window.saveTeacherSchedule()">زیادکردنی خشتە</button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th id="tsThName">ناوی مامۆستا</th>
+                            <th id="tsThSub">وانە</th>
+                            <th id="tsThDept">بەش</th>
+                            <th id="tsThNum">ڕیزبەندی وانە</th>
+                            <th id="tsThDay">ڕۆژ</th>
+                            <th id="tsThTime">کات</th>
+                            <th id="tsThAction">کردار</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teacherScheduleTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- گرتنەخۆوەی فایلی سەرەکی JavaScript -->
+    <script src="script.js" type="module"></script>
+</body>
+</html>
