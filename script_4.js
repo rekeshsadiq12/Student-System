@@ -475,7 +475,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebas
 import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, serverTimestamp, arrayUnion, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDYouV_1YS--bKzCdmjGABMV5V7gySwCxc",
+    apiKey: "AIzaSyBftSnUkGn_N8vpgHspICH4kU54eamgXz0",
     authDomain: "student-admin-d3c1c.firebaseapp.com",
     projectId: "student-admin-d3c1c",
     storageBucket: "student-admin-d3c1c.firebasestorage.app",
